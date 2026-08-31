@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Homeschool Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1a1611;
+    --bg-card:#231e17;
+    --bg-card-raised:#2b241b;
+    --line:#3a3226;
+    --ink:#f0e6d3;
+    --ink-dim:#b9ab90;
+    --ink-faint:#8a7c64;
+    --wine:#8a3a44;
+    --wine-soft:#a8555f;
+    --sage:#6b7a56;
+    --gold:#c49a5e;
+    --rose:#a97a7e;
+    --radius:2px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    background-image:
+      radial-gradient(ellipse 800px 500px at 10% -10%, rgba(138,58,68,0.10), transparent),
+      radial-gradient(ellipse 700px 600px at 100% 20%, rgba(107,122,86,0.08), transparent);
+    color:var(--ink);
+    font-family:'Crimson Text', Georgia, serif;
+    font-size:17px;
+    line-height:1.5;
+    min-height:100vh;
+  }
+  h1,h2,h3,.display{
+    font-family:'Cormorant Garamond', Georgia, serif;
+    font-weight:600;
+    letter-spacing:0.01em;
+  }
+  .eyebrow{
+    font-family:'Crimson Text', Georgia, serif;
+    font-size:12px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--gold);
+  }
+  a{color:var(--rose);}
+  a:hover{color:var(--gold);}
+
+  /* --- sprig divider (signature element) --- */
+  .sprig{width:100%;height:22px;opacity:0.55;margin:6px 0 18px;}
+  .sprig svg{width:100%;height:100%;}
+  .sprig path{stroke:var(--sage);stroke-width:1;fill:none;}
+  .sprig circle{fill:var(--rose);}
+
+  header{
+    padding:38px 24px 18px;
+    max-width:980px;
+    margin:0 auto;
+    text-align:center;
+  }
+  header h1{
+    font-size:clamp(30px,5vw,44px);
+    margin:6px 0 2px;
+    color:var(--ink);
+  }
+  header .sub{color:var(--ink-dim);font-size:15px;font-style:italic;}
+
+  nav.tabs{
+    display:flex;
+    justify-content:center;
+    gap:6px;
+    flex-wrap:wrap;
+    max-width:980px;
+    margin:18px auto 0;
+    padding:0 24px;
+  }
+  nav.tabs button{
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--ink-dim);
+    font-family:'Crimson Text', Georgia, serif;
+    font-size:13px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    padding:10px 18px;
+    border-radius:var(--radius);
+    cursor:pointer;
+    transition:all .2s ease;
+  }
+  nav.tabs button:hover{border-color:var(--gold);color:var(--ink);}
+  nav.tabs button.active{background:var(--wine);border-color:var(--wine);color:var(--ink);}
+
+  main{max-width:980px;margin:0 auto;padding:28px 24px 80px;}
+  section.view{display:none;}
+  section.view.active{display:block;animation:fade .35s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  .card{
+    background:var(--bg-card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:22px 24px;
+    margin-bottom:18px;
+  }
+  .card h2{font-size:24px;margin:0 0 4px;color:var(--ink);}
+  .card h3{font-size:19px;margin:0 0 6px;color:var(--gold);font-weight:600;}
+  .muted{color:var(--ink-dim);font-size:15px;}
+  .why{color:var(--ink-faint);font-size:14px;font-style:italic;margin-top:4px;}
+
+  .day-row{
+    display:grid;
+    grid-template-columns:110px 1fr;
+    gap:14px;
+    padding:14px 0;
+    border-top:1px solid var(--line);
+  }
+  .day-row:first-of-type{border-top:none;}
+  .day-label{
+    font-family:'Cormorant Garamond', Georgia, serif;
+    font-weight:600;
+    font-size:19px;
+    color:var(--rose);
+    padding-top:2px;
+  }
+  .day-body p{margin:0 0 6px;}
+  .day-body .links{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
+  .link-chip{
+    display:inline-block;
+    font-size:13px;
+    border:1px solid var(--line);
+    padding:5px 11px;
+    border-radius:var(--radius);
+    color:var(--ink-dim);
+    text-decoration:none;
+    background:var(--bg-card-raised);
+  }
+  .link-chip:hover{border-color:var(--gold);color:var(--ink);}
+
+  .week-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  .week-nav button{
+    background:none;border:1px solid var(--line);color:var(--ink-dim);
+    padding:6px 14px;border-radius:var(--radius);cursor:pointer;font-family:inherit;
+  }
+  .week-nav button:hover{border-color:var(--gold);color:var(--ink);}
+  .week-title{text-align:center;flex:1;}
+  .week-title .eyebrow{display:block;}
+  .week-title span.range{color:var(--ink-faint);font-size:14px;}
+
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media(max-width:680px){.grid-2{grid-template-columns:1fr;} .day-row{grid-template-columns:1fr;}}
+
+  ul.plain{list-style:none;margin:0;padding:0;}
+  ul.plain li{padding:9px 0;border-top:1px solid var(--line);}
+  ul.plain li:first-child{border-top:none;}
+  ul.plain li a{font-size:16px;}
+  ul.plain li .tag{color:var(--ink-faint);font-size:13px;display:block;margin-top:2px;}
+
+  .kid-tag{
+    display:inline-block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--bg);background:var(--sage);padding:2px 8px;border-radius:10px;margin-right:8px;
+  }
+  .kid-tag.rose{background:var(--rose);}
+  .kid-tag.gold{background:var(--gold);}
+  .kid-tag.wine{background:var(--wine-soft);}
+
+  /* checklist */
+  .check{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-top:1px solid var(--line);}
+  .check:first-child{border-top:none;}
+  .check input{margin-top:4px;accent-color:var(--wine);width:16px;height:16px;}
+  .check label{flex:1;cursor:pointer;}
+  .check label.done{color:var(--ink-faint);text-decoration:line-through;}
+
+  textarea, input[type=text]{
+    width:100%;background:var(--bg-card-raised);border:1px solid var(--line);color:var(--ink);
+    font-family:'Crimson Text', Georgia, serif;font-size:15px;padding:10px 12px;border-radius:var(--radius);
+    resize:vertical;
+  }
+  textarea:focus, input:focus, button:focus{outline:2px solid var(--gold);outline-offset:1px;}
+
+  table.snapshot{width:100%;border-collapse:collapse;font-size:14px;}
+  table.snapshot th{
+    text-align:left;color:var(--gold);font-weight:600;font-size:12px;letter-spacing:.06em;
+    text-transform:uppercase;padding:8px 6px;border-bottom:1px solid var(--line);
+  }
+  table.snapshot td{padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top;}
+  table.snapshot td[contenteditable]{min-height:18px;}
+  table.snapshot td[contenteditable]:focus{background:var(--bg-card-raised);outline:1px solid var(--gold);}
+
+  .save-note{font-size:12px;color:var(--ink-faint);margin-top:10px;text-align:right;}
+
+  .special-card{
+    border-left:3px solid var(--wine-soft);
+    padding-left:16px;margin-bottom:16px;
+  }
+  .reset-link{font-size:12px;color:var(--ink-faint);text-decoration:underline;cursor:pointer;background:none;border:none;font-family:inherit;padding:0;}
+
+  footer{text-align:center;padding:30px 24px 50px;color:var(--ink-faint);font-size:13px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Works of Body &middot; Home Study</div>
+  <h1>The Homeschool Dashboard</h1>
+  <div class="sub">One place for the week, the links, and what's already been done.</div>
+</header>
+
+<nav class="tabs">
+  <button data-view="today" class="active">Today</button>
+  <button data-view="week">This Week</button>
+  <button data-view="individual">Individual Work</button>
+  <button data-view="connection">Connection Time</button>
+  <button data-view="lightday">Light Day</button>
+  <button data-view="track">Track It</button>
+</nav>
+
+<main>
+
+  <!-- TODAY -->
+  <section id="today" class="view active">
+    <div class="card">
+      <div class="eyebrow" id="todayDateLabel">Today</div>
+      <h2 id="todayHeading">Loading…</h2>
+      <div class="sprig">
+        <svg viewBox="0 0 400 22" preserveAspectRatio="none"><path d="M0,11 C60,2 100,20 160,11 S260,2 400,11"/><circle cx="60" cy="6" r="2.4"/><circle cx="220" cy="14" r="2.2"/><circle cx="340" cy="6" r="2"/></svg>
+      </div>
+      <div id="todayBody"><p class="muted">Set today's plan from the This Week tab — whatever week you mark current will show up here automatically on its matching weekday.</p></div>
+    </div>
+
+    <div class="card">
+      <h3>The Daily Rhythm</h3>
+      <div class="grid-2">
+        <ul class="plain">
+          <li><strong>9:00–9:20</strong> — Morning basket (calendar, memory work)<span class="tag">All together</span></li>
+          <li><strong>9:20–9:50</strong> — Read-aloud<span class="tag">All together</span></li>
+          <li><strong>9:50–10:30</strong> — History / Science (rotate) or Nature Walk (Wed)<span class="tag">All together</span></li>
+        </ul>
+        <ul class="plain">
+          <li><strong>10:45–12:15</strong> — Individual work rotation<span class="tag">One-on-one, staggered</span></li>
+          <li><strong>12:15</strong> — Lunch</li>
+          <li><strong>1:00–1:30</strong> — Free reading / independent project time<span class="tag">Optional, 2–3x/week</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- THIS WEEK -->
+  <section id="week" class="view">
+    <div class="card">
+      <div class="week-nav">
+        <button id="prevWeek">&larr; Prev</button>
+        <div class="week-title">
+          <span class="eyebrow" id="weekEyebrow">Week 1</span>
+          <span class="range" id="weekRange">Aug 3–6</span>
+        </div>
+        <button id="nextWeek">Next &rarr;</button>
+      </div>
+      <p class="muted" style="text-align:center;">
+        <label style="cursor:pointer;"><input type="checkbox" id="setCurrentWeek" style="accent-color:var(--wine);"> Mark this the current week (shows on the Today tab)</label>
+      </p>
+      <div class="sprig">
+        <svg viewBox="0 0 400 22" preserveAspectRatio="none"><path d="M0,11 C60,2 100,20 160,11 S260,2 400,11"/><circle cx="60" cy="6" r="2.4"/><circle cx="220" cy="14" r="2.2"/><circle cx="340" cy="6" r="2"/></svg>
+      </div>
+      <div id="weekTheme" style="margin-bottom:10px;"></div>
+      <div id="weekDays"></div>
+    </div>
+
+    <div class="card">
+      <h3>Notes / Adjustments for This Week</h3>
+      <p class="muted">Moved a day around? Swapped an activity? Jot it here — saves automatically, no need to touch the code for changes like this.</p>
+      <textarea id="weekAdjustNote" rows="3" placeholder="e.g. moved Wed's science to Thursday since we did the nature walk Tuesday instead..."></textarea>
+      <div class="save-note">Saved automatically on this device, tied to this specific week.</div>
+    </div>
+  </section>
+
+  <!-- INDIVIDUAL WORK -->
+  <section id="individual" class="view">
+    <div class="card">
+      <h2>Reading &amp; Phonics</h2>
+      <ul class="plain">
+        <li><span class="kid-tag rose">5yo</span><a href="https://www.progressivephonics.com/alphabet-books" target="_blank">Progressive Phonics — Alphabetti (free)</a><span class="tag">Letter recognition &amp; first sounds. Self-paced, one book at a time.</span></li>
+        <li><span class="kid-tag gold">8yo</span><a href="https://www.progressivephonics.com/phonics-books/beginner-phonics-books" target="_blank">Progressive Phonics — Beginner</a> / <a href="https://www.progressivephonics.com/phonics-books/intermediate-phonics-books" target="_blank">Intermediate (free)</a><span class="tag">Try an Intermediate passage first — drop to Beginner if it's a struggle.</span></li>
+        <li><a href="https://www.allaboutlearningpress.com/reading-placement/" target="_blank">All About Reading — free placement test</a><span class="tag">Use if you want a paid, fully scripted alternative/backup.</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Math</h2>
+      <ul class="plain">
+        <li><a href="https://placement.mathusee.com/placement-test" target="_blank">Math-U-See — free placement tool</a><span class="tag">All three kids, if levels are unsure.</span></li>
+        <li><span class="kid-tag wine">12yo</span><a href="https://www.teachingtextbooks.com" target="_blank">Teaching Textbooks</a><span class="tag">Self-paced, voice-guided, immediate feedback — chosen for focus support.</span></li>
+        <li><span class="kid-tag wine">12yo</span>Life of Fred — narrative math, occasional supplement, not the main sequence</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Spelling</h2>
+      <ul class="plain">
+        <li><a href="https://www.allaboutlearningpress.com/spelling-placement/" target="_blank">All About Spelling — free placement test</a><span class="tag">Rule-based, multisensory — good fit for strong readers who spell by feel, not rule.</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Penmanship</h2>
+      <ul class="plain">
+        <li><a href="https://www.callirobics.com" target="_blank">Callirobics</a><span class="tag"><span class="kid-tag wine">12yo</span>Handwriting practice set to music — the one place her being musical is a literal advantage.</span></li>
+        <li>Handwriting Without Tears — print (5yo) &amp; cursive (8yo) tracks</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>12yo Language Arts — Weekly Rhythm</h2>
+      <p class="why">She has a strong creative voice already — this teaches mechanics around it, not instead of it.</p>
+      <ul class="plain">
+        <li><strong>Mon &amp; Wed</strong> — Copywork from her current book + <a href="https://www.khanacademy.org/humanities/grammar" target="_blank">Khan Academy Grammar</a> (free, start Unit 8: Syntax)</li>
+        <li><strong>Tue</strong> — Big Juicy Conversation about her book, or a Paragraph Structure exercise (alternate weekly)</li>
+        <li><strong>Thu</strong> — Freewrite, 5–10 min timed, no editing</li>
+        <li><strong>Fri</strong> — Dictation + "why is that punctuation there?" + Poetry Teatime</li>
+        <li><strong>Weekly</strong> — "Translate the Poem": rewrite one of her own lines as a standard, fully-punctuated sentence</li>
+        <li><strong>Monthly</strong> — Punctuation Hunt: add punctuation back into a stripped passage</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- CONNECTION TIME -->
+  <section id="connection" class="view">
+    <div class="card">
+      <h2>One-on-One Ritual Ideas</h2>
+      <p class="muted">Same instinct as Poetry Teatime — consistent day/time, zero academic agenda, theirs alone.</p>
+
+      <div class="special-card">
+        <h3><span class="kid-tag wine">12yo</span> Poetry Teatime</h3>
+        <p>Tea, something nice to eat, poems read aloud together — hers or published poets'. No agenda. Anchors the whole language arts week.</p>
+      </div>
+
+      <div class="special-card">
+        <h3><span class="kid-tag rose">5yo</span> Tea Party or Storytime Snuggle</h3>
+        <p>Small cups, a "fancy" snack, stuffed animals invited as guests, a picture book read together — or a simple baking morning (built-in counting/measuring, zero pressure).</p>
+      </div>
+
+      <div class="special-card">
+        <h3><span class="kid-tag gold">8yo</span> Comic Club or Snack &amp; Sketch</h3>
+        <p>Hot cocoa + comics/graphic novels, discussed like poems — favorite panel, what happens next. Or drawing invented gadgets/creatures together while snacking, no "right way" to draw.</p>
+      </div>
+
+      <div class="special-card" style="border-left-color:var(--sage);">
+        <h3><span class="kid-tag">10yo</span> Snack &amp; Strategy or Tinker Time</h3>
+        <p>A standing one-on-one game night (chess, cards, strategy games) with a snack that's just his — or an old gadget to take apart and see how it works.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- LIGHT DAY -->
+  <section id="lightday" class="view">
+    <div class="card">
+      <div class="eyebrow">For the days you can't teach</div>
+      <h2>Light Day Mode</h2>
+      <p class="muted">Doctor appointment, sick day, just need a break — hand each kid this menu and let them pick. No supervision required, nothing to grade.</p>
+      <div class="sprig">
+        <svg viewBox="0 0 400 22" preserveAspectRatio="none"><path d="M0,11 C60,2 100,20 160,11 S260,2 400,11"/><circle cx="60" cy="6" r="2.4"/><circle cx="220" cy="14" r="2.2"/><circle cx="340" cy="6" r="2"/></svg>
+      </div>
+
+      <div class="special-card">
+        <h3><span class="kid-tag wine">12yo</span> Pick One</h3>
+        <ul class="plain">
+          <li>Free reading + an optional 10-min freewrite after, zero pressure<span class="tag">Whatever book she's into right now</span></li>
+          <li>Music or dance free time<span class="tag">No lesson, no assignment — her choice entirely</span></li>
+          <li>A self-directed creative project<span class="tag">Poem, sketch, playlist — if she wants a prompt: "design an album cover for a song that doesn't exist yet"</span></li>
+        </ul>
+      </div>
+
+      <div class="special-card">
+        <h3><span class="kid-tag gold">8yo</span> Pick One</h3>
+        <ul class="plain">
+          <li>Comic-making<span class="tag">Fold paper into a mini booklet, draw and write his own comic, no rules</span></li>
+          <li>LEGO or building challenge<span class="tag">One-line prompt: "tallest tower that holds a book" or "a creature with 6 legs"</span></li>
+          <li>Audiobook + drawing<span class="tag">A story on audio (Libby works well) while he draws alongside it</span></li>
+        </ul>
+      </div>
+
+      <div class="special-card" style="border-left-color:var(--sage);">
+        <h3><span class="kid-tag">5yo</span> Pick One</h3>
+        <ul class="plain">
+          <li>Playdough or a sensory bin<span class="tag">Dry rice/beans with cups and spoons, or playdough with cookie cutters — low mess, high entertainment</span></li>
+          <li>"Read" the pictures<span class="tag">Hand her a picture book she knows well, let her tell the story from the pictures</span></li>
+          <li>Sticker or coloring page<span class="tag">Simplest option, for the easiest possible day</span></li>
+        </ul>
+      </div>
+
+      <div class="special-card" style="border-left-color:var(--gold);">
+        <h3>All Three Together — Backyard Scavenger Hunt</h3>
+        <p>Write a list of 5 things to find (a rock, something red, something soft, something round, something that smells good). Each kid works it at their own level. No supervision needed once the list is written.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRACK IT -->
+  <section id="track" class="view">
+    <div class="card">
+      <h2>Daily Quick-Log</h2>
+      <p class="muted">Checkboxes, not essays. The point is a record you can scan later.</p>
+      <div id="dailyChecks"></div>
+      <div class="save-note">Saved automatically on this device.</div>
+    </div>
+
+    <div class="card">
+      <h2>Weekly Look-Back</h2>
+      <p class="muted">Two minutes, Friday or Sunday — what actually got covered vs. planned, and anything to shift.</p>
+      <textarea id="weeklyNote" rows="4" placeholder="What happened this week..."></textarea>
+      <div class="save-note">Saved automatically on this device.</div>
+    </div>
+
+    <div class="card">
+      <h2>Monthly Snapshot</h2>
+      <p class="muted">The one table worth keeping long-term. Click any cell to edit.</p>
+      <table class="snapshot">
+        <thead><tr><th>Week</th><th>Read-aloud</th><th>History</th><th>Science</th><th>Notes</th></tr></thead>
+        <tbody id="snapshotBody"></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Portfolio Pieces to File</h2>
+      <p class="muted">One best work sample per kid, per week.</p>
+      <div id="portfolioInputs"></div>
+      <div class="save-note">Saved automatically on this device.</div>
+    </div>
+
+    <div class="card">
+      <h2>Progress Report</h2>
+      <p class="muted">Compiles everything logged in this dashboard — weekly notes, monthly snapshot, portfolio entries, and the curriculum themes covered — into one summary you can print or copy into a permanent record.</p>
+      <button id="genReport" style="background:var(--wine);border:none;color:var(--ink);padding:10px 18px;border-radius:var(--radius);cursor:pointer;font-family:inherit;font-size:15px;">Generate Report</button>
+    </div>
+
+    <button class="reset-link" id="resetAll">Clear all saved tracking &amp; notes on this device</button>
+  </section>
+
+  <!-- REPORT (modal-style overlay) -->
+  <div id="reportOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:50;overflow-y:auto;padding:30px 16px;">
+    <div style="max-width:800px;margin:0 auto;background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);padding:30px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h2 style="margin:0;">Progress Report</h2>
+        <button id="closeReport" style="background:none;border:1px solid var(--line);color:var(--ink-dim);padding:6px 14px;border-radius:var(--radius);cursor:pointer;">Close</button>
+      </div>
+      <div id="reportContent" style="font-size:15px;line-height:1.6;"></div>
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <button id="printReport" style="background:var(--wine);border:none;color:var(--ink);padding:10px 18px;border-radius:var(--radius);cursor:pointer;font-family:inherit;">Print / Save as PDF</button>
+        <button id="copyReport" style="background:none;border:1px solid var(--line);color:var(--ink);padding:10px 18px;border-radius:var(--radius);cursor:pointer;font-family:inherit;">Copy to Clipboard</button>
+      </div>
+      <p class="muted" style="margin-top:14px;font-size:13px;">Tip: paste this into a Google Doc periodically (end of month is a good rhythm) so you have a permanent copy outside this device.</p>
+    </div>
+  </div>
+
+</main>
+
+<footer>Built for the Works of Body household &middot; edit the data arrays in this file to update weeks and links</footer>
+
+<script>
+// ============ DATA ============
+const KIDS = ["5yo","8yo","12yo"];
+
+const WEEKS = [
+  {
+    week:1, range:"Aug 3–6",
+    theme:{history:"Getting started — Age of Exploration overview", science:"What makes something a plant?"},
+    days:[
+      {day:"Mon", history:"Establish rhythm. Start read-aloud (Charlotte's Web / Little House). Light phonics &amp; math placement check.",
+        links:[{l:"AAR Placement Test",u:"https://www.allaboutlearningpress.com/reading-placement/"},{l:"Math-U-See Placement",u:"https://placement.mathusee.com/placement-test"}]},
+      {day:"Tue", history:"Age of Exploration overview, discussion.",
+        links:[{l:"Age of Discovery video",u:"https://www.youtube.com/watch?v=eFKKkeDafaU"},{l:"Age of Exploration lesson (12yo)",u:"https://study.com/academy/lesson/age-of-exploration-lesson-for-kids.html"}]},
+      {day:"Wed", history:"Nature walk + science: parts of a plant.",
+        links:[{l:"Plant Parts video",u:"https://www.generationgenius.com/videolessons/plant-parts-video-for-kids/"},{l:"Parts of a Plant song",u:"https://www.youtube.com/watch?v=ql6OL7_qFgU"}]},
+      {day:"Thu", history:"Christopher Columbus + full individual rotation.",
+        links:[{l:"Columbus video (Homeschool Pop)",u:"https://www.youtube.com/watch?v=gCIWX0EIef8"}]},
+      {day:"Fri", history:"Library trip — read-alouds, Encounter, plant books, regional field guide.", links:[]},
+    ]
+  },
+  {
+    week:2, range:"Aug 10–13",
+    theme:{history:"Other explorers &amp; map work", science:"Starting a seed experiment"},
+    days:[
+      {day:"Mon", history:"Magellan + trace explorer routes on a map.",
+        links:[{l:"Magellan video",u:"https://www.youtube.com/watch?v=ZBf8wi7LdYk"},{l:"Ponce de León bio (Ducksters)",u:"https://www.ducksters.com/biography/explorers/juan_ponce_de_leon.php"}]},
+      {day:"Tue", history:"Set up bean-in-a-jar experiment. Predictions in nature journal.",
+        links:[{l:"Bean-in-a-jar instructions",u:"https://rainydaymum.co.uk/bean-in-a-jar-experiment/"},{l:"Watch a Seed Sprout (SciShow Kids)",u:"https://www.youtube.com/watch?v=-rJdVQNy6TY"}]},
+      {day:"Wed", history:"Nature walk — wild vs. planted. Check the jar, record observations.", links:[]},
+      {day:"Thu", history:"Oral review of explorers. Check jar again. Full individual rotation.", links:[]},
+      {day:"Fri", history:"Open day / catch-up.", links:[]},
+    ]
+  },
+  {
+    week:3, range:"Aug 17–20",
+    theme:{history:"Early colonies", science:"Transplanting the seedling"},
+    days:[
+      {day:"Mon", history:"Jamestown — why it almost failed, what saved it.",
+        links:[{l:"Colonial America / Jamestown overview",u:"https://www.youtube.com/watch?v=kne4gkaIVys"},{l:"Jamestown story (gentler, 5yo)",u:"https://www.youtube.com/watch?v=t0kr8_E6Va0"}]},
+      {day:"Tue", history:"The Mayflower &amp; Plymouth — compare to Jamestown.",
+        links:[{l:"All About the Mayflower",u:"https://www.youtube.com/watch?v=sm7O4R1uN9s"}]},
+      {day:"Wed", history:"Nature walk + transplant the bean sprout into soil.", links:[]},
+      {day:"Thu", history:"Daily life in the colonies. Full individual rotation.",
+        links:[{l:"Pilgrim Life (Scholastic News)",u:"https://www.youtube.com/watch?v=4Icao42RALg"}]},
+      {day:"Fri", history:"Library / field trip / catch-up.", links:[]},
+    ]
+  }
+];
+
+// ============ STATE ============
+const todayIdx = new Date().getDay(); // 0 Sun .. 6 Sat
+const DAY_NAMES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+let currentWeekView = parseInt(localStorage.getItem('hs_currentWeekIdx') || '0', 10);
+if(currentWeekView >= WEEKS.length) currentWeekView = 0;
+
+// ============ TABS ============
+document.querySelectorAll('nav.tabs button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('section.view').forEach(v=>v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.view).classList.add('active');
+  });
+});
+
+// ============ WEEK RENDER ============
+function renderWeek(){
+  const w = WEEKS[currentWeekView];
+  document.getElementById('weekEyebrow').textContent = 'Week ' + w.week;
+  document.getElementById('weekRange').textContent = w.range;
+  document.getElementById('weekTheme').innerHTML =
+    '<p><strong>History:</strong> '+w.theme.history+'</p><p><strong>Science:</strong> '+w.theme.science+'</p>';
+  document.getElementById('weekDays').innerHTML = w.days.map(d=>{
+    const links = d.links.map(x=>`<a class="link-chip" href="${x.u}" target="_blank">${x.l}</a>`).join('');
+    return `<div class="day-row">
+      <div class="day-label">${d.day}</div>
+      <div class="day-body"><p>${d.history}</p>${links?'<div class="links">'+links+'</div>':''}</div>
+    </div>`;
+  }).join('');
+
+  const storedCurrent = localStorage.getItem('hs_currentWeekIdx');
+  document.getElementById('setCurrentWeek').checked = storedCurrent !== null && parseInt(storedCurrent,10) === currentWeekView;
+
+  const adjustNote = document.getElementById('weekAdjustNote');
+  adjustNote.value = localStorage.getItem('hs_weekadjust_' + currentWeekView) || '';
+}
+function bindWeekAdjustNote(){
+  const adjustNote = document.getElementById('weekAdjustNote');
+  adjustNote.addEventListener('input', ()=>{
+    localStorage.setItem('hs_weekadjust_' + currentWeekView, adjustNote.value);
+  });
+}
+document.getElementById('prevWeek').addEventListener('click', ()=>{
+  currentWeekView = (currentWeekView - 1 + WEEKS.length) % WEEKS.length;
+  renderWeek();
+});
+document.getElementById('nextWeek').addEventListener('click', ()=>{
+  currentWeekView = (currentWeekView + 1) % WEEKS.length;
+  renderWeek();
+});
+document.getElementById('setCurrentWeek').addEventListener('change', (e)=>{
+  if(e.target.checked){
+    localStorage.setItem('hs_currentWeekIdx', currentWeekView);
+  } else {
+    localStorage.removeItem('hs_currentWeekIdx');
+  }
+  renderToday();
+});
+
+// ============ TODAY RENDER ============
+function renderToday(){
+  const dateLabel = new Date().toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric'});
+  document.getElementById('todayDateLabel').textContent = dateLabel;
+
+  const storedCurrent = localStorage.getItem('hs_currentWeekIdx');
+  const dayName = DAY_NAMES[todayIdx];
+
+  if(storedCurrent === null){
+    document.getElementById('todayHeading').textContent = "No week marked as current yet";
+    document.getElementById('todayBody').innerHTML = '<p class="muted">Go to <strong>This Week</strong>, find the week you\'re on, and check "Mark this the current week."</p>';
+    return;
+  }
+  const w = WEEKS[parseInt(storedCurrent,10)];
+  const d = w.days.find(x=>x.day === dayName);
+  if(!d){
+    document.getElementById('todayHeading').textContent = "No school today";
+    document.getElementById('todayBody').innerHTML = '<p class="muted">Weekend / off day. Enjoy it.</p>';
+    return;
+  }
+  document.getElementById('todayHeading').textContent = 'Week '+w.week+' — '+d.day;
+  const links = d.links.map(x=>`<a class="link-chip" href="${x.u}" target="_blank">${x.l}</a>`).join('');
+  document.getElementById('todayBody').innerHTML = `<p>${d.history}</p>${links?'<div class="links">'+links+'</div>':''}`;
+}
+
+// ============ DAILY CHECKLIST ============
+const CHECK_ITEMS = [
+  "Read-aloud",
+  "History / Science covered",
+  "5yo individual work",
+  "8yo individual work",
+  "12yo individual work"
+];
+function todayKey(){ return 'hs_checks_' + new Date().toISOString().slice(0,10); }
+function renderChecks(){
+  const saved = JSON.parse(localStorage.getItem(todayKey()) || '{}');
+  const el = document.getElementById('dailyChecks');
+  el.innerHTML = CHECK_ITEMS.map((item,i)=>{
+    const checked = saved[i] ? 'checked' : '';
+    const doneClass = saved[i] ? 'done' : '';
+    return `<div class="check">
+      <input type="checkbox" id="chk${i}" ${checked} data-idx="${i}">
+      <label for="chk${i}" class="${doneClass}">${item}</label>
+    </div>`;
+  }).join('');
+  el.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('change', ()=>{
+      const saved = JSON.parse(localStorage.getItem(todayKey()) || '{}');
+      saved[inp.dataset.idx] = inp.checked;
+      localStorage.setItem(todayKey(), JSON.stringify(saved));
+      inp.nextElementSibling.classList.toggle('done', inp.checked);
+    });
+  });
+}
+
+// ============ WEEKLY NOTE ============
+function weekNoteKey(){
+  const d = new Date();
+  const onejan = new Date(d.getFullYear(),0,1);
+  const weekNum = Math.ceil((((d - onejan) / 86400000) + onejan.getDay()+1)/7);
+  return 'hs_weeklynote_' + d.getFullYear() + '_' + weekNum;
+}
+function renderWeeklyNote(){
+  const ta = document.getElementById('weeklyNote');
+  ta.value = localStorage.getItem(weekNoteKey()) || '';
+  ta.addEventListener('input', ()=> localStorage.setItem(weekNoteKey(), ta.value));
+}
+
+// ============ PORTFOLIO ============
+function renderPortfolio(){
+  const key = 'hs_portfolio_' + new Date().toISOString().slice(0,10);
+  const saved = JSON.parse(localStorage.getItem(key) || '{}');
+  const el = document.getElementById('portfolioInputs');
+  el.innerHTML = KIDS.map(k=>`
+    <div style="margin-bottom:10px;">
+      <label class="muted" style="display:block;margin-bottom:4px;">${k}</label>
+      <input type="text" data-kid="${k}" value="${(saved[k]||'').replace(/"/g,'&quot;')}" placeholder="What to file...">
+    </div>`).join('');
+  el.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const saved = JSON.parse(localStorage.getItem(key) || '{}');
+      saved[inp.dataset.kid] = inp.value;
+      localStorage.setItem(key, JSON.stringify(saved));
+    });
+  });
+}
+
+// ============ MONTHLY SNAPSHOT ============
+function renderSnapshot(){
+  const key = 'hs_snapshot';
+  const saved = JSON.parse(localStorage.getItem(key) || '{}');
+  const rows = ["Wk 1","Wk 2","Wk 3","Wk 4"];
+  const cols = ["readaloud","history","science","notes"];
+  const body = document.getElementById('snapshotBody');
+  body.innerHTML = rows.map((r,ri)=>{
+    const cells = cols.map(c=>{
+      const val = (saved[ri] && saved[ri][c]) ? saved[ri][c] : '';
+      return `<td contenteditable="true" data-row="${ri}" data-col="${c}">${val}</td>`;
+    }).join('');
+    return `<tr><td>${r}</td>${cells}</tr>`;
+  }).join('');
+  body.querySelectorAll('td[contenteditable]').forEach(td=>{
+    td.addEventListener('blur', ()=>{
+      const saved = JSON.parse(localStorage.getItem(key) || '{}');
+      const ri = td.dataset.row;
+      saved[ri] = saved[ri] || {};
+      saved[ri][td.dataset.col] = td.textContent;
+      localStorage.setItem(key, JSON.stringify(saved));
+    });
+  });
+}
+
+// ============ RESET ============
+document.getElementById('resetAll').addEventListener('click', ()=>{
+  if(confirm('Clear all saved tracking (checklists, notes, snapshot, portfolio) on this device? This cannot be undone.')){
+    Object.keys(localStorage).filter(k=>k.startsWith('hs_')).forEach(k=>localStorage.removeItem(k));
+    renderChecks(); renderWeeklyNote(); renderPortfolio(); renderSnapshot(); renderToday();
+    document.getElementById('setCurrentWeek').checked = false;
+  }
+});
+
+// ============ REPORT ============
+function buildReport(){
+  const today = new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
+  let html = `<p class="muted">Generated ${today}</p>`;
+
+  // Curriculum themes covered
+  html += '<h3>Curriculum Covered</h3><ul class="plain">';
+  WEEKS.forEach(w=>{
+    const adj = localStorage.getItem('hs_weekadjust_' + (w.week-1));
+    html += `<li><strong>Week ${w.week} (${w.range})</strong> — History: ${w.theme.history}. Science: ${w.theme.science}.`;
+    if(adj) html += `<br><span class="tag">Adjustment noted: ${escapeHtml(adj)}</span>`;
+    html += `</li>`;
+  });
+  html += '</ul>';
+
+  // Weekly look-back notes
+  const weekNoteKeys = Object.keys(localStorage).filter(k=>k.startsWith('hs_weeklynote_')).sort();
+  html += '<h3>Weekly Look-Back Notes</h3>';
+  if(weekNoteKeys.length === 0){
+    html += '<p class="muted">None logged yet.</p>';
+  } else {
+    html += '<ul class="plain">';
+    weekNoteKeys.forEach(k=>{
+      const val = localStorage.getItem(k);
+      if(val && val.trim()){
+        const label = k.replace('hs_weeklynote_','').replace('_',' — Week ');
+        html += `<li><strong>${label}</strong>: ${escapeHtml(val)}</li>`;
+      }
+    });
+    html += '</ul>';
+  }
+
+  // Monthly snapshot
+  html += '<h3>Monthly Snapshot</h3>';
+  const snap = JSON.parse(localStorage.getItem('hs_snapshot') || '{}');
+  const rowLabels = ["Week 1","Week 2","Week 3","Week 4"];
+  if(Object.keys(snap).length === 0){
+    html += '<p class="muted">Not filled in yet.</p>';
+  } else {
+    html += '<table class="snapshot"><thead><tr><th>Week</th><th>Read-aloud</th><th>History</th><th>Science</th><th>Notes</th></tr></thead><tbody>';
+    rowLabels.forEach((r,ri)=>{
+      const row = snap[ri] || {};
+      html += `<tr><td>${r}</td><td>${escapeHtml(row.readaloud||'')}</td><td>${escapeHtml(row.history||'')}</td><td>${escapeHtml(row.science||'')}</td><td>${escapeHtml(row.notes||'')}</td></tr>`;
+    });
+    html += '</tbody></table>';
+  }
+
+  // Portfolio entries
+  const portfolioKeys = Object.keys(localStorage).filter(k=>k.startsWith('hs_portfolio_')).sort();
+  html += '<h3>Portfolio Pieces Filed</h3>';
+  if(portfolioKeys.length === 0){
+    html += '<p class="muted">None logged yet.</p>';
+  } else {
+    html += '<ul class="plain">';
+    portfolioKeys.forEach(k=>{
+      const date = k.replace('hs_portfolio_','');
+      const entries = JSON.parse(localStorage.getItem(k) || '{}');
+      const parts = Object.entries(entries).filter(([kid,val])=>val && val.trim()).map(([kid,val])=>`${kid}: ${escapeHtml(val)}`);
+      if(parts.length){
+        html += `<li><strong>${date}</strong> — ${parts.join(' · ')}</li>`;
+      }
+    });
+    html += '</ul>';
+  }
+
+  return html;
+}
+function escapeHtml(s){
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+document.getElementById('genReport').addEventListener('click', ()=>{
+  document.getElementById('reportContent').innerHTML = buildReport();
+  document.getElementById('reportOverlay').style.display = 'block';
+});
+document.getElementById('closeReport').addEventListener('click', ()=>{
+  document.getElementById('reportOverlay').style.display = 'none';
+});
+document.getElementById('printReport').addEventListener('click', ()=>{
+  const w = window.open('', '_blank');
+  w.document.write('<html><head><title>Homeschool Progress Report</title><style>body{font-family:Georgia,serif;padding:30px;color:#222;} table{border-collapse:collapse;width:100%;} td,th{border:1px solid #ccc;padding:6px 8px;text-align:left;} h3{margin-top:24px;}</style></head><body>' + document.getElementById('reportContent').innerHTML + '</body></html>');
+  w.document.close();
+  w.print();
+});
+document.getElementById('copyReport').addEventListener('click', ()=>{
+  const text = document.getElementById('reportContent').innerText;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = document.getElementById('copyReport');
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(()=> btn.textContent = orig, 1500);
+  });
+});
+
+// ============ INIT ============
+renderWeek();
+bindWeekAdjustNote();
+renderToday();
+renderChecks();
+renderWeeklyNote();
+renderPortfolio();
+renderSnapshot();
+</script>
+</body>
+</html>
