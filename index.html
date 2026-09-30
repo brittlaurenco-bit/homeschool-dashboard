@@ -2,994 +2,692 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Homeschool Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>The Morning Desk</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#1a1611;
-    --bg-card:#231e17;
-    --bg-card-raised:#2b241b;
-    --line:#3a3226;
-    --ink:#f0e6d3;
-    --ink-dim:#b9ab90;
-    --ink-faint:#8a7c64;
-    --wine:#8a3a44;
-    --wine-soft:#a8555f;
-    --sage:#6b7a56;
-    --gold:#c49a5e;
-    --rose:#a97a7e;
-    --radius:2px;
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --cream: #FAF8F4; --ink: #2A2520; --ink-mid: #6B6259;
+    --ink-light: #A89E95; --rule: #E2DDD7;
+    --anchor-bg: #EEE8E0; --body-bg: #F0F4EE; --world-bg: #F5F1EB;
   }
-  *{box-sizing:border-box;}
-  body{
-    margin:0;
-    background:var(--bg);
-    background-image:
-      radial-gradient(ellipse 800px 500px at 10% -10%, rgba(138,58,68,0.10), transparent),
-      radial-gradient(ellipse 700px 600px at 100% 20%, rgba(107,122,86,0.08), transparent);
-    color:var(--ink);
-    font-family:'Crimson Text', Georgia, serif;
-    font-size:17px;
-    line-height:1.5;
-    min-height:100vh;
+  html, body { min-height: 100%; background: var(--cream); color: var(--ink); font-family: 'Lora', Georgia, serif; -webkit-font-smoothing: antialiased; }
+  #loading { position: fixed; inset: 0; background: var(--cream); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; z-index: 100; }
+  .loading-title { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 400; color: var(--ink); }
+  .loading-sub { font-size: 14px; color: var(--ink-light); font-style: italic; animation: breathe 2s ease-in-out infinite; }
+  .dots { display: flex; gap: 8px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-light); animation: bounce 1.4s ease-in-out infinite; }
+  .dot:nth-child(2) { animation-delay: 0.2s; } .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,80%,100%{ transform:translateY(0);opacity:.4; } 40%{ transform:translateY(-8px);opacity:1; } }
+  @keyframes breathe { 0%,100%{ opacity:.5; } 50%{ opacity:1; } }
+  #page { display: none; padding-bottom: 48px; }
+  .masthead { text-align: center; padding: 32px 24px 20px; border-bottom: 1px solid var(--rule); }
+  .pub-title { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 600; letter-spacing: 0.04em; color: var(--ink); margin-bottom: 6px; }
+  .pub-date { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-light); font-style: italic; }
+  .section-header { padding: 18px 20px 0; display: flex; align-items: center; gap: 12px; }
+  .section-title { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-light); white-space: nowrap; }
+  .section-rule { flex: 1; height: 0.5px; background: var(--rule); }
+  .anchor-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--rule); border-top: 0.5px solid var(--rule); border-bottom: 0.5px solid var(--rule); margin-top: 10px; }
+  .anchor-card { background: var(--anchor-bg); padding: 20px 16px 24px; text-align: center; }
+  .anchor-label { font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-light); margin-bottom: 12px; display: block; }
+  .anchor-prompt { font-family: 'Playfair Display', serif; font-size: 15px; font-style: italic; line-height: 1.5; color: var(--ink); }
+  .anchor-sub { font-size: 11px; color: var(--ink-light); margin-top: 8px; font-style: italic; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--rule); border-top: 0.5px solid var(--rule); border-bottom: 0.5px solid var(--rule); margin-top: 10px; }
+  .card { background: var(--cream); padding: 20px 18px 24px; }
+  .card.full { grid-column: 1/-1; }
+  .card.world-bg { background: var(--world-bg); }
+  .card.body-bg { background: var(--body-bg); }
+  .clabel { font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-light); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .clabel-line { flex: 1; height: 0.5px; background: var(--rule); }
+  .cheadline { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 400; line-height: 1.2; margin-bottom: 5px; }
+  .csub { font-size: 11px; color: var(--ink-light); font-style: italic; margin-bottom: 10px; }
+  .cbody { font-size: 14px; line-height: 1.7; color: var(--ink-mid); }
+  .divider { border: none; border-top: 0.5px solid var(--rule); margin: 10px 0; }
+  .tier { border-radius: 7px; padding: 8px 11px; margin-top: 9px; font-size: 12px; line-height: 1.5; }
+  .tier-label { font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; display: block; margin-bottom: 3px; font-weight: 500; }
+  .tier-littles { background: rgba(186,117,23,0.08); color: var(--ink-mid); }
+  .tier-littles .tier-label { color: #854F0B; }
+  .sight-word-display { font-family: 'Playfair Display', serif; font-size: 64px; font-weight: 600; color: var(--ink); line-height: 1; margin: 10px 0 6px; }
+  .sight-sentence { font-size: 14px; color: var(--ink-mid); font-style: italic; line-height: 1.6; margin-top: 8px; }
+  .lang-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+  .lang-pill { font-size: 10px; padding: 3px 9px; border-radius: 20px; }
+  .lang-es { background: rgba(198,0,0,0.07); color: #8B0000; }
+  .lang-fr { background: rgba(0,35,149,0.07); color: #002395; }
+  .lang-asl { background: rgba(83,74,183,0.08); color: #534AB7; }
+  .asl-note { margin-top: 7px; font-size: 11px; color: var(--ink-light); font-style: italic; line-height: 1.5; }
+  .asl-link { font-size: 10px; color: #534AB7; margin-top: 3px; display: block; }
+  .person-name { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 600; color: var(--ink); margin-bottom: 3px; }
+  .person-dates { font-size: 11px; color: var(--ink-light); font-style: italic; margin-bottom: 10px; }
+  .person-theme { font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-light); margin-bottom: 8px; display: block; }
+  .talk-about { margin-top: 10px; padding: 8px 11px; background: rgba(0,0,0,0.03); border-radius: 7px; font-size: 12px; color: var(--ink-mid); line-height: 1.5; }
+  .talk-about strong { font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-light); display: block; margin-bottom: 3px; }
+  .poem-title { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 600; color: var(--ink); margin-bottom: 3px; }
+  .poem-author { font-size: 11px; color: var(--ink-light); font-style: italic; margin-bottom: 14px; }
+  .poem-text { font-family: 'Playfair Display', serif; font-size: 14px; font-style: italic; line-height: 1.9; color: var(--ink); border-left: 2px solid var(--rule); padding-left: 14px; margin-bottom: 12px; }
+  .poem-question { font-size: 13px; color: #534AB7; font-style: italic; margin-top: 10px; }
+  .wonder { margin-top: 10px; font-size: 13px; color: #3B6D11; font-style: italic; line-height: 1.55; }
+  .body-headline { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--ink); margin-bottom: 8px; line-height: 1.3; }
+  .movement-prompt { font-family: 'Playfair Display', serif; font-size: 17px; font-style: italic; line-height: 1.5; color: var(--ink); margin-top: 8px; }
+  .movement-sub { font-size: 12px; color: var(--ink-light); margin-top: 8px; line-height: 1.5; }
+  .skill-name { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--ink); margin-bottom: 8px; }
+  .skill-steps { margin-top: 8px; padding-left: 0; list-style: none; }
+  .skill-steps li { font-size: 13px; color: var(--ink-mid); line-height: 1.6; padding: 3px 0; display: flex; gap: 8px; }
+  .skill-steps li::before { content: attr(data-n); font-size: 10px; color: var(--ink-light); font-weight: 600; min-width: 14px; margin-top: 2px; }
+  .challenge-text { font-size: 16px; line-height: 1.6; color: var(--ink); font-family: 'Playfair Display', serif; font-style: italic; margin-top: 8px; }
+  .footer { text-align: center; padding: 24px 24px 0; }
+  .footer-note { font-size: 11px; color: var(--ink-light); font-style: italic; }
+  @media (min-width: 768px) {
+    .pub-title { font-size: 44px; }
+    .card { padding: 24px 22px 28px; }
+    .cheadline { font-size: 26px; }
+    .cbody { font-size: 15px; }
+    .anchor-prompt { font-size: 17px; }
+    .sight-word-display { font-size: 80px; }
   }
-  h1,h2,h3,.display{
-    font-family:'Cormorant Garamond', Georgia, serif;
-    font-weight:600;
-    letter-spacing:0.01em;
-  }
-  .eyebrow{
-    font-family:'Crimson Text', Georgia, serif;
-    font-size:12px;
-    letter-spacing:0.16em;
-    text-transform:uppercase;
-    color:var(--gold);
-  }
-  a{color:var(--rose);}
-  a:hover{color:var(--gold);}
-
-  /* --- sprig divider (signature element) --- */
-  .sprig{width:100%;height:22px;opacity:0.55;margin:6px 0 18px;}
-  .sprig svg{width:100%;height:100%;}
-  .sprig path{stroke:var(--sage);stroke-width:1;fill:none;}
-  .sprig circle{fill:var(--rose);}
-
-  header{
-    padding:38px 24px 18px;
-    max-width:980px;
-    margin:0 auto;
-    text-align:center;
-  }
-  header h1{
-    font-size:clamp(30px,5vw,44px);
-    margin:6px 0 2px;
-    color:var(--ink);
-  }
-  header .sub{color:var(--ink-dim);font-size:15px;font-style:italic;}
-
-  nav.tabs{
-    display:flex;
-    justify-content:center;
-    gap:6px;
-    flex-wrap:wrap;
-    max-width:980px;
-    margin:18px auto 0;
-    padding:0 24px;
-  }
-  nav.tabs button{
-    background:transparent;
-    border:1px solid var(--line);
-    color:var(--ink-dim);
-    font-family:'Crimson Text', Georgia, serif;
-    font-size:13px;
-    letter-spacing:0.08em;
-    text-transform:uppercase;
-    padding:10px 18px;
-    border-radius:var(--radius);
-    cursor:pointer;
-    transition:all .2s ease;
-  }
-  nav.tabs button:hover{border-color:var(--gold);color:var(--ink);}
-  nav.tabs button.active{background:var(--wine);border-color:var(--wine);color:var(--ink);}
-
-  main{max-width:980px;margin:0 auto;padding:28px 24px 80px;}
-  section.view{display:none;}
-  section.view.active{display:block;animation:fade .35s ease;}
-  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
-
-  .card{
-    background:var(--bg-card);
-    border:1px solid var(--line);
-    border-radius:var(--radius);
-    padding:22px 24px;
-    margin-bottom:18px;
-  }
-  .card h2{font-size:24px;margin:0 0 4px;color:var(--ink);}
-  .card h3{font-size:19px;margin:0 0 6px;color:var(--gold);font-weight:600;}
-  .muted{color:var(--ink-dim);font-size:15px;}
-  .why{color:var(--ink-faint);font-size:14px;font-style:italic;margin-top:4px;}
-
-  .day-row{
-    display:grid;
-    grid-template-columns:110px 1fr;
-    gap:14px;
-    padding:14px 0;
-    border-top:1px solid var(--line);
-  }
-  .day-row:first-of-type{border-top:none;}
-  .day-label{
-    font-family:'Cormorant Garamond', Georgia, serif;
-    font-weight:600;
-    font-size:19px;
-    color:var(--rose);
-    padding-top:2px;
-  }
-  .day-body p{margin:0 0 6px;}
-  .day-body .links{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
-  .link-chip{
-    display:inline-block;
-    font-size:13px;
-    border:1px solid var(--line);
-    padding:5px 11px;
-    border-radius:var(--radius);
-    color:var(--ink-dim);
-    text-decoration:none;
-    background:var(--bg-card-raised);
-  }
-  .link-chip:hover{border-color:var(--gold);color:var(--ink);}
-
-  .week-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-  .week-nav button{
-    background:none;border:1px solid var(--line);color:var(--ink-dim);
-    padding:6px 14px;border-radius:var(--radius);cursor:pointer;font-family:inherit;
-  }
-  .week-nav button:hover{border-color:var(--gold);color:var(--ink);}
-  .week-title{text-align:center;flex:1;}
-  .week-title .eyebrow{display:block;}
-  .week-title span.range{color:var(--ink-faint);font-size:14px;}
-
-  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
-  @media(max-width:680px){.grid-2{grid-template-columns:1fr;} .day-row{grid-template-columns:1fr;}}
-
-  ul.plain{list-style:none;margin:0;padding:0;}
-  ul.plain li{padding:9px 0;border-top:1px solid var(--line);}
-  ul.plain li:first-child{border-top:none;}
-  ul.plain li a{font-size:16px;}
-  ul.plain li .tag{color:var(--ink-faint);font-size:13px;display:block;margin-top:2px;}
-
-  .kid-tag{
-    display:inline-block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
-    color:var(--bg);background:var(--sage);padding:2px 8px;border-radius:10px;margin-right:8px;
-  }
-  .kid-tag.rose{background:var(--rose);}
-  .kid-tag.gold{background:var(--gold);}
-  .kid-tag.wine{background:var(--wine-soft);}
-
-  /* checklist */
-  .check{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-top:1px solid var(--line);}
-  .check:first-child{border-top:none;}
-  .check input{margin-top:4px;accent-color:var(--wine);width:16px;height:16px;}
-  .check label{flex:1;cursor:pointer;}
-  .check label.done{color:var(--ink-faint);text-decoration:line-through;}
-
-  textarea, input[type=text]{
-    width:100%;background:var(--bg-card-raised);border:1px solid var(--line);color:var(--ink);
-    font-family:'Crimson Text', Georgia, serif;font-size:15px;padding:10px 12px;border-radius:var(--radius);
-    resize:vertical;
-  }
-  textarea:focus, input:focus, button:focus{outline:2px solid var(--gold);outline-offset:1px;}
-
-  table.snapshot{width:100%;border-collapse:collapse;font-size:14px;}
-  table.snapshot th{
-    text-align:left;color:var(--gold);font-weight:600;font-size:12px;letter-spacing:.06em;
-    text-transform:uppercase;padding:8px 6px;border-bottom:1px solid var(--line);
-  }
-  table.snapshot td{padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top;}
-  table.snapshot td[contenteditable]{min-height:18px;}
-  table.snapshot td[contenteditable]:focus{background:var(--bg-card-raised);outline:1px solid var(--gold);}
-
-  .save-note{font-size:12px;color:var(--ink-faint);margin-top:10px;text-align:right;}
-
-  .special-card{
-    border-left:3px solid var(--wine-soft);
-    padding-left:16px;margin-bottom:16px;
-  }
-  .reset-link{font-size:12px;color:var(--ink-faint);text-decoration:underline;cursor:pointer;background:none;border:none;font-family:inherit;padding:0;}
-
-  footer{text-align:center;padding:30px 24px 50px;color:var(--ink-faint);font-size:13px;}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="eyebrow">Works of Body &middot; Home Study</div>
-  <h1>The Homeschool Dashboard</h1>
-  <div class="sub">One place for the week, the links, and what's already been done.</div>
-</header>
+<div id="loading">
+  <div class="loading-title">The Morning Desk</div>
+  <div class="loading-sub">Getting things ready...</div>
+  <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+</div>
 
-<nav class="tabs">
-  <button data-view="today" class="active">Today</button>
-  <button data-view="week">This Week</button>
-  <button data-view="individual">Individual Work</button>
-  <button data-view="connection">Connection Time</button>
-  <button data-view="lightday">Light Day</button>
-  <button data-view="track">Track It</button>
-</nav>
-
-<main>
-
-  <!-- TODAY -->
-  <section id="today" class="view active">
-    <div class="card">
-      <div class="eyebrow" id="todayDateLabel">Today</div>
-      <h2 id="todayHeading">Loading…</h2>
-      <div class="sprig">
-        <svg viewBox="0 0 400 22" preserveAspectRatio="none"><path d="M0,11 C60,2 100,20 160,11 S260,2 400,11"/><circle cx="60" cy="6" r="2.4"/><circle cx="220" cy="14" r="2.2"/><circle cx="340" cy="6" r="2"/></svg>
-      </div>
-      <div id="todayBody"><p class="muted">Set today's plan from the This Week tab — whatever week you mark current will show up here automatically on its matching weekday.</p></div>
-    </div>
-
-    <div class="card">
-      <h3>The Daily Rhythm</h3>
-      <p class="muted">Mondays run differently now — see below.</p>
-      <div class="grid-2">
-        <ul class="plain">
-          <li><strong>Monday</strong> — Kickoff Day: dance party, weekly preview, goal-setting<span class="tag">Fun, low-key, no academic content</span></li>
-          <li><strong>9:20–9:50</strong> — Read-aloud<span class="tag">Tue–Fri, all together</span></li>
-          <li><strong>9:50–10:30</strong> — History / Science (rotate) or Nature Walk<span class="tag">Tue–Fri, all together</span></li>
-        </ul>
-        <ul class="plain">
-          <li><strong>10:45–12:15</strong> — Individual work rotation<span class="tag">Tue–Fri, one-on-one, staggered</span></li>
-          <li><strong>12:15</strong> — Lunch</li>
-          <li><strong>Library / errands</strong> — whenever it fits<span class="tag">No longer a fixed day — slot in when convenient</span></li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <!-- THIS WEEK -->
-  <section id="week" class="view">
-    <div class="card">
-      <div class="week-nav">
-        <button id="prevWeek">&larr; Prev</button>
-        <div class="week-title">
-          <span class="eyebrow" id="weekEyebrow">Week 1</span>
-          <span class="range" id="weekRange">Aug 3–6</span>
-        </div>
-        <button id="nextWeek">Next &rarr;</button>
-      </div>
-      <p class="muted" style="text-align:center;">
-        <label style="cursor:pointer;"><input type="checkbox" id="setCurrentWeek" style="accent-color:var(--wine);"> Mark this the current week (shows on the Today tab)</label>
-      </p>
-      <div class="sprig">
-        <svg viewBox="0 0 400 22" preserveAspectRatio="none"><path d="M0,11 C60,2 100,20 160,11 S260,2 400,11"/><circle cx="60" cy="6" r="2.4"/><circle cx="220" cy="14" r="2.2"/><circle cx="340" cy="6" r="2"/></svg>
-      </div>
-      <div id="weekTheme" style="margin-bottom:10px;"></div>
-      <div id="weekDays"></div>
-    </div>
-
-    <div class="card">
-      <h3>Notes / Adjustments for This Week</h3>
-      <p class="muted">Moved a day around? Swapped an activity? Jot it here — saves automatically, no need to touch the code for changes like this.</p>
-      <textarea id="weekAdjustNote" rows="3" placeholder="e.g. moved Wed's science to Thursday since we did the nature walk Tuesday instead..."></textarea>
-      <div class="save-note">Saved automatically on this device, tied to this specific week.</div>
-    </div>
-  </section>
-
-  <!-- INDIVIDUAL WORK -->
-  <section id="individual" class="view">
-    <div class="card">
-      <h2>Reading &amp; Phonics</h2>
-      <ul class="plain">
-        <li><span class="kid-tag rose">5yo</span><a href="https://www.progressivephonics.com/alphabet-books" target="_blank">Progressive Phonics — Alphabetti (free)</a><span class="tag">Letter recognition &amp; first sounds. Self-paced, one book at a time.</span></li>
-        <li><span class="kid-tag gold">8yo</span><a href="https://www.progressivephonics.com/phonics-books/beginner-phonics-books" target="_blank">Progressive Phonics — Beginner</a> / <a href="https://www.progressivephonics.com/phonics-books/intermediate-phonics-books" target="_blank">Intermediate (free)</a><span class="tag">Try an Intermediate passage first — drop to Beginner if it's a struggle.</span></li>
-        <li><a href="https://www.allaboutlearningpress.com/reading-placement/" target="_blank">All About Reading — free placement test</a><span class="tag">Use if you want a paid, fully scripted alternative/backup.</span></li>
-      </ul>
-    </div>
-
-    <div class="card">
-      <h2>Math</h2>
-      <ul class="plain">
-        <li><a href="https://placement.mathusee.com/placement-test" target="_blank">Math-U-See — free placement tool</a><span class="tag">All three kids, if levels are unsure.</span></li>
-        <li><span class="kid-tag wine">12yo</span><a href="https://www.teachingtextbooks.com" target="_blank">Teaching Textbooks</a><span class="tag">Self-paced, voice-guided, immediate feedback — chosen for focus support.</span></li>
-        <li><span class="kid-tag wine">12yo</span>Life of Fred — narrative math, occasional supplement, not the main sequence</li>
-      </ul>
-    </div>
-
-    <div class="card">
-      <h2>Spelling</h2>
-      <ul class="plain">
-        <li><a href="https://www.allaboutlearningpress.com/spelling-placement/" target="_blank">All About Spelling — free placement test</a><span class="tag">Rule-based, multisensory — good fit for strong readers who spell by feel, not rule.</span></li>
-      </ul>
-    </div>
-
-    <div class="card">
-      <h2>Penmanship</h2>
-      <ul class="plain">
-        <li><a href="https://www.callirobics.com" target="_blank">Callirobics</a><span class="tag"><span class="kid-tag wine">12yo</span>Handwriting practice set to music — the one place her being musical is a literal advantage.</span></li>
-        <li>Handwriting Without Tears — print (5yo) &amp; cursive (8yo) tracks</li>
-      </ul>
-    </div>
-
-    <div class="card">
-      <h2>12yo Language Arts — Weekly Rhythm</h2>
-      <p class="why">She has a strong creative voice already — this teaches mechanics around it, not instead of it.</p>
-      <ul class="plain">
-        <li><strong>Mon &amp; Wed</strong> — Copywork from her current book + <a href="https://www.khanacademy.org/humanities/grammar" target="_blank">Khan Academy Grammar</a> (free, start Unit 8: Syntax)</li>
-        <li><strong>Tue</strong> — Big Juicy Conversation about her book, or a Paragraph Structure exercise (alternate weekly)</li>
-        <li><strong>Thu</strong> — Freewrite, 5–10 min timed, no editing</li>
-        <li><strong>Fri</strong> — Dictation + "why is that punctuation there?" + Poetry Teatime</li>
-        <li><strong>Weekly</strong> — "Translate the Poem": rewrite one of her own lines as a standard, fully-punctuated sentence</li>
-        <li><strong>Monthly</strong> — Punctuation Hunt: add punctuation back into a stripped passage</li>
-      </ul>
-    </div>
-
-    <div class="card">
-      <h2>New Hobby Taste — Skill Rotation (Monday Kickoff)</h2>
-      <p class="muted">One per week, cycling through, then repeats. Each gets ~10–15 min on its Kickoff morning.</p>
-
-      <h3>1. Mental Math &amp; Estimation</h3>
-      <ul class="plain">
-        <li><span class="kid-tag rose">5yo</span>"About how many?" — guess a small pile of objects before counting together</li>
-        <li><span class="kid-tag gold">8yo</span>Round prices/numbers to the nearest 10, then check the exact answer</li>
-        <li><span class="kid-tag">10yo</span>Estimate the shopping cart total before checkout, compare to the receipt</li>
-        <li><span class="kid-tag wine">12yo</span>Quick percentage/discount estimates before working the exact answer</li>
-      </ul>
-
-      <h3>2. Memory (Memory Palace)</h3>
-      <ul class="plain">
-        <li><span class="kid-tag rose">5yo</span>Chain game — "I went to the market and bought..." each person adds and repeats the list</li>
-        <li><span class="kid-tag gold">8yo</span>A 3–4 stop mini palace using their bedroom — memorize a short list</li>
-        <li><span class="kid-tag">10yo</span>A full 10-stop palace (their house) — memorize something in fixed order, like the planets</li>
-        <li><span class="kid-tag wine">12yo</span>Use the palace for real content — the sequence of Revolutionary War events</li>
-      </ul>
-
-      <h3>3. Ask an Expert</h3>
-      <p>All ages: before/after learning something new, write or say 2–3 genuinely curious questions you'd ask a real expert. Chase a real answer down sometimes — that's what makes it stick.</p>
-
-      <h3>4. Time Estimation</h3>
-      <p>All ages: guess how long a task will take, then time it and compare. Works best woven into normal moments (chores, errands, reading) rather than scheduled separately.</p>
-
-      <h3>5. Touch Typing</h3>
-      <ul class="plain">
-        <li><span class="kid-tag">10yo</span> &amp; <span class="kid-tag wine">12yo</span><a href="https://www.typing.com" target="_blank">Typing.com</a> (free, self-guided)</li>
-        <li><span class="kid-tag gold">8yo</span>Home row letter games (beginner track)</li>
-        <li><span class="kid-tag rose">5yo</span>Simple keyboard familiarity only — too young for touch typing proper</li>
-      </ul>
-
-      <h3>6. Map Reading</h3>
-      <ul class="plain">
-        <li><span class="kid-tag rose">5yo</span>Point to directions on a simple compass rose picture</li>
-        <li><span class="kid-tag gold">8yo</span>Follow a hand-drawn treasure map around the house or yard</li>
-        <li><span class="kid-tag">10yo</span>Read a real map — find locations, estimate distance using the scale</li>
-        <li><span class="kid-tag wine">12yo</span>Basic orienteering — real compass, plot and follow a short route</li>
-      </ul>
-      <p><a href="https://kidminds.org/map-reading-basics/" target="_blank">Free map reading activity pack (compass rose, scale, key)</a></p>
-
-      <h3>7. Body Language / Reading a Room</h3>
-      <p><strong>Core game, all ages:</strong> Feelings Charades — draw an emotion, act it out with face and body only, everyone else guesses.</p>
-      <ul class="plain">
-        <li><span class="kid-tag rose">5yo</span>Just the game, plus naming emotions on real faces during the day</li>
-        <li><span class="kid-tag gold">8yo</span>Add "what do you think they felt and how could you tell?" after a story or show</li>
-        <li><span class="kid-tag">10yo</span>Mismatch rounds — act one emotion, show a different one on your face, guess which is real</li>
-        <li><span class="kid-tag wine">12yo</span>Discuss context clues beyond the face — posture, tone, what's not being said</li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- CONNECTION TIME -->
-  <section id="connection" class="view">
-    <div class="card">
-      <h2>One-on-One Ritual Ideas</h2>
-      <p class="muted">Same instinct as Poetry Teatime — consistent day/time, zero academic agenda, theirs alone.</p>
-
-      <div class="special-card" style="border-left-color:var(--gold);">
-        <h3>Monday Kickoff Ritual</h3>
-        <p><strong>1. Dance party (5 min)</strong> — put on a song, everyone dances, no rules. Shakes off the weekend transition before anything else starts.</p>
-        <p><strong>2. Weekly preview</strong> — read the week's theme out loud together (check the This Week tab). Build excitement: "this week we get to..."</p>
-        <p><strong>3. Goal-setting</strong> — each kid names one personal goal for the week, academic or personal, their choice. Say it out loud or write it down.</p>
-        <p><strong>4. Skill Spotlight (15–20 min)</strong> — a rotating self-improvement/enrichment segment, one category per week, cycling through all four:</p>
-        <ul class="plain">
-          <li><strong>Life Skill</strong> — a practical kitchen/household skill, age-scaled (measuring ingredients, following a recipe, a repair task)</li>
-          <li><strong>Money &amp; Enterprise</strong> — coin ID for the 5yo, a savings jar for the 8yo, needs-vs-wants budgeting for the 10yo, a mini business-idea brainstorm for the 12yo</li>
-          <li><strong>Character &amp; Mindset</strong> — gratitude practice, a growth-mindset discussion, a kindness challenge for the week</li>
-          <li><strong>New Hobby Taste</strong> — its own 7-week sub-rotation, one skill per week, then repeats:
-            <ol style="margin:6px 0 0 18px;padding:0;">
-              <li>Mental Math &amp; Estimation</li>
-              <li>Memory (Memory Palace technique)</li>
-              <li>Ask an Expert</li>
-              <li>Time Estimation</li>
-              <li>Touch Typing</li>
-              <li>Map Reading</li>
-              <li>Body Language / Reading a Room</li>
-            </ol>
-          </li>
-        </ul>
-        <p class="why">Full age-scaled practice for each of the 7 skills is in the Individual Work tab.</p>
-        <p><strong>5. One thing to look forward to</strong> — each kid names one thing about the week ahead they're genuinely excited about.</p>
-        <p class="why">No academic content on Mondays anymore — this replaces it entirely.</p>
-      </div>
-
-      <div class="special-card">
-        <h3><span class="kid-tag wine">12yo</span> Poetry Teatime</h3>
-        <p>Tea, something nice to eat, poems read aloud together — hers or published poets'. No agenda. Anchors the whole language arts week.</p>
-      </div>
-
-      <div class="special-card">
-        <h3><span class="kid-tag rose">5yo</span> Tea Party or Storytime Snuggle</h3>
-        <p>Small cups, a "fancy" snack, stuffed animals invited as guests, a picture book read together — or a simple baking morning (built-in counting/measuring, zero pressure).</p>
-      </div>
-
-      <div class="special-card">
-        <h3><span class="kid-tag gold">8yo</span> Comic Club or Snack &amp; Sketch</h3>
-        <p>Hot cocoa + comics/graphic novels, discussed like poems — favorite panel, what happens next. Or drawing invented gadgets/creatures together while snacking, no "right way" to draw.</p>
-      </div>
-
-      <div class="special-card" style="border-left-color:var(--sage);">
-        <h3><span class="kid-tag">10yo</span> Snack &amp; Strategy or Tinker Time</h3>
-        <p>A standing one-on-one game night (chess, cards, strategy games) with a snack that's just his — or an old gadget to take apart and see how it works.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- LIGHT DAY -->
-  <section id="lightday" class="view">
-    <div class="card">
-      <div class="eyebrow">For the days you can't teach</div>
-      <h2>Light Day Mode</h2>
-      <p class="muted">Doctor appointment, sick day, just need a break — hand each kid this menu and let them pick. No supervision required, nothing to grade.</p>
-      <div class="sprig">
-        <svg viewBox="0 0 400 22" preserveAspectRatio="none"><path d="M0,11 C60,2 100,20 160,11 S260,2 400,11"/><circle cx="60" cy="6" r="2.4"/><circle cx="220" cy="14" r="2.2"/><circle cx="340" cy="6" r="2"/></svg>
-      </div>
-
-      <div class="special-card">
-        <h3><span class="kid-tag wine">12yo</span> Pick One</h3>
-        <ul class="plain">
-          <li>Free reading + an optional 10-min freewrite after, zero pressure<span class="tag">Whatever book she's into right now</span></li>
-          <li>Music or dance free time<span class="tag">No lesson, no assignment — her choice entirely</span></li>
-          <li>A self-directed creative project<span class="tag">Poem, sketch, playlist — if she wants a prompt: "design an album cover for a song that doesn't exist yet"</span></li>
-        </ul>
-      </div>
-
-      <div class="special-card">
-        <h3><span class="kid-tag gold">8yo</span> Pick One</h3>
-        <ul class="plain">
-          <li>Comic-making<span class="tag">Fold paper into a mini booklet, draw and write his own comic, no rules</span></li>
-          <li>LEGO or building challenge<span class="tag">One-line prompt: "tallest tower that holds a book" or "a creature with 6 legs"</span></li>
-          <li>Audiobook + drawing<span class="tag">A story on audio (Libby works well) while he draws alongside it</span></li>
-        </ul>
-      </div>
-
-      <div class="special-card" style="border-left-color:var(--sage);">
-        <h3><span class="kid-tag">5yo</span> Pick One</h3>
-        <ul class="plain">
-          <li>Playdough or a sensory bin<span class="tag">Dry rice/beans with cups and spoons, or playdough with cookie cutters — low mess, high entertainment</span></li>
-          <li>"Read" the pictures<span class="tag">Hand her a picture book she knows well, let her tell the story from the pictures</span></li>
-          <li>Sticker or coloring page<span class="tag">Simplest option, for the easiest possible day</span></li>
-        </ul>
-      </div>
-
-      <div class="special-card" style="border-left-color:var(--gold);">
-        <h3>All Three Together — Backyard Scavenger Hunt</h3>
-        <p>Write a list of 5 things to find (a rock, something red, something soft, something round, something that smells good). Each kid works it at their own level. No supervision needed once the list is written.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- TRACK IT -->
-  <section id="track" class="view">
-    <div class="card">
-      <h2>Daily Quick-Log</h2>
-      <p class="muted">Checkboxes, not essays. The point is a record you can scan later.</p>
-      <div id="dailyChecks"></div>
-      <div class="save-note">Saved automatically on this device.</div>
-    </div>
-
-    <div class="card">
-      <h2>Weekly Look-Back</h2>
-      <p class="muted">Two minutes, Friday or Sunday — what actually got covered vs. planned, and anything to shift.</p>
-      <textarea id="weeklyNote" rows="4" placeholder="What happened this week..."></textarea>
-      <div class="save-note">Saved automatically on this device.</div>
-    </div>
-
-    <div class="card">
-      <h2>Monthly Snapshot</h2>
-      <p class="muted">The one table worth keeping long-term. Click any cell to edit.</p>
-      <table class="snapshot">
-        <thead><tr><th>Week</th><th>Read-aloud</th><th>History</th><th>Science</th><th>Notes</th></tr></thead>
-        <tbody id="snapshotBody"></tbody>
-      </table>
-    </div>
-
-    <div class="card">
-      <h2>Portfolio Pieces to File</h2>
-      <p class="muted">One best work sample per kid, per week.</p>
-      <div id="portfolioInputs"></div>
-      <div class="save-note">Saved automatically on this device.</div>
-    </div>
-
-    <div class="card">
-      <h2>Progress Report</h2>
-      <p class="muted">Compiles everything logged in this dashboard — weekly notes, monthly snapshot, portfolio entries, and the curriculum themes covered — into one summary you can print or copy into a permanent record.</p>
-      <button id="genReport" style="background:var(--wine);border:none;color:var(--ink);padding:10px 18px;border-radius:var(--radius);cursor:pointer;font-family:inherit;font-size:15px;">Generate Report</button>
-    </div>
-
-    <button class="reset-link" id="resetAll">Clear all saved tracking &amp; notes on this device</button>
-  </section>
-
-  <!-- REPORT (modal-style overlay) -->
-  <div id="reportOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:50;overflow-y:auto;padding:30px 16px;">
-    <div style="max-width:800px;margin:0 auto;background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);padding:30px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <h2 style="margin:0;">Progress Report</h2>
-        <button id="closeReport" style="background:none;border:1px solid var(--line);color:var(--ink-dim);padding:6px 14px;border-radius:var(--radius);cursor:pointer;">Close</button>
-      </div>
-      <div id="reportContent" style="font-size:15px;line-height:1.6;"></div>
-      <div style="display:flex;gap:10px;margin-top:20px;">
-        <button id="printReport" style="background:var(--wine);border:none;color:var(--ink);padding:10px 18px;border-radius:var(--radius);cursor:pointer;font-family:inherit;">Print / Save as PDF</button>
-        <button id="copyReport" style="background:none;border:1px solid var(--line);color:var(--ink);padding:10px 18px;border-radius:var(--radius);cursor:pointer;font-family:inherit;">Copy to Clipboard</button>
-      </div>
-      <p class="muted" style="margin-top:14px;font-size:13px;">Tip: paste this into a Google Doc periodically (end of month is a good rhythm) so you have a permanent copy outside this device.</p>
-    </div>
+<div id="page">
+  <div class="masthead">
+    <div class="pub-title">The Morning Desk</div>
+    <div class="pub-date" id="today-date"></div>
   </div>
-
-</main>
-
-<footer>Built for the Works of Body household &middot; edit the data arrays in this file to update weeks and links</footer>
+  <div id="main-content"></div>
+</div>
 
 <script>
-// ============ DATA ============
-const KIDS = ["5yo","8yo","12yo"];
-
-const WEEKS = [
-  {
-    week:1, range:"Aug 3–6",
-    theme:{history:"Getting started — Age of Exploration overview", science:"What makes something a plant?"},
-    days:[
-      {day:"Mon", history:"KICKOFF DAY: Dance party to start (5 min, any song). Preview the week out loud — this week we start our very first read-aloud, meet history's earliest explorers, and kick off our first science experiment! Each kid names one goal for the week and one thing they're excited about.", links:[]},
-      {day:"Tue", history:"Establish rhythm. Start read-aloud (Charlotte's Web / Little House). Light phonics &amp; math placement check.",
-        links:[{l:"AAR Placement Test",u:"https://www.allaboutlearningpress.com/reading-placement/"},{l:"Math-U-See Placement",u:"https://placement.mathusee.com/placement-test"}]},
-      {day:"Wed", history:"Age of Exploration overview, discussion.",
-        links:[{l:"Age of Discovery video",u:"https://www.youtube.com/watch?v=eFKKkeDafaU"},{l:"Age of Exploration lesson (12yo)",u:"https://study.com/academy/lesson/age-of-exploration-lesson-for-kids.html"}]},
-      {day:"Thu", history:"Nature walk + science: parts of a plant.",
-        links:[{l:"Plant Parts video",u:"https://www.generationgenius.com/videolessons/plant-parts-video-for-kids/"},{l:"Parts of a Plant song",u:"https://www.youtube.com/watch?v=ql6OL7_qFgU"}]},
-      {day:"Fri", history:"Christopher Columbus + full individual rotation. Library trip if it fits — read-alouds, Encounter, plant books, regional field guide.",
-        links:[{l:"Columbus video (Homeschool Pop)",u:"https://www.youtube.com/watch?v=gCIWX0EIef8"}]},
-    ]
-  },
-  {
-    week:2, range:"Aug 10–13",
-    theme:{history:"Other explorers &amp; map work", science:"Starting a seed experiment"},
-    days:[
-      {day:"Mon", history:"KICKOFF DAY: Dance party to start. Preview the week — meeting more explorers and starting a real seed experiment. Each kid names one goal for the week.", links:[]},
-      {day:"Tue", history:"Magellan + trace explorer routes on a map.",
-        links:[{l:"Magellan video",u:"https://www.youtube.com/watch?v=ZBf8wi7LdYk"},{l:"Ponce de León bio (Ducksters)",u:"https://www.ducksters.com/biography/explorers/juan_ponce_de_leon.php"}]},
-      {day:"Wed", history:"Set up bean-in-a-jar experiment. Predictions in nature journal.",
-        links:[{l:"Bean-in-a-jar instructions",u:"https://rainydaymum.co.uk/bean-in-a-jar-experiment/"},{l:"Watch a Seed Sprout (SciShow Kids)",u:"https://www.youtube.com/watch?v=-rJdVQNy6TY"}]},
-      {day:"Thu", history:"Nature walk — wild vs. planted. Check the jar, record observations.", links:[]},
-      {day:"Fri", history:"Oral review of explorers. Check jar again. Full individual rotation. Open day/catch-up if it fits.", links:[]},
-    ]
-  },
-  {
-    week:3, range:"Aug 17–20",
-    theme:{history:"Early colonies", science:"Transplanting the seedling"},
-    days:[
-      {day:"Mon", history:"KICKOFF DAY: Dance party to start. Preview the week — Jamestown, the Mayflower, and transplanting our seedling into real soil. Each kid names one goal for the week.", links:[]},
-      {day:"Tue", history:"Jamestown — why it almost failed, what saved it.",
-        links:[{l:"Colonial America / Jamestown overview",u:"https://www.youtube.com/watch?v=kne4gkaIVys"},{l:"Jamestown story (gentler, 5yo)",u:"https://www.youtube.com/watch?v=t0kr8_E6Va0"}]},
-      {day:"Wed", history:"The Mayflower &amp; Plymouth — compare to Jamestown.",
-        links:[{l:"All About the Mayflower",u:"https://www.youtube.com/watch?v=sm7O4R1uN9s"}]},
-      {day:"Thu", history:"Nature walk + transplant the bean sprout into soil.", links:[]},
-      {day:"Fri", history:"Daily life in the colonies. Full individual rotation. Library trip if it fits.",
-        links:[{l:"Pilgrim Life (Scholastic News)",u:"https://www.youtube.com/watch?v=4Icao42RALg"}]},
-    ]
-  },
-  {
-    week:4, range:"Aug 31–Sep 3",
-    theme:{history:"Wampanoag perspective, then opening the Revolution thread", science:"Closing plants, opening habitats"},
-    days:[
-      {day:"Mon", history:"KICKOFF DAY: Dance party to start. Preview the week — the Native perspective on colonization, and starting to learn about habitats. Each kid names one goal for the week.", links:[]},
-      {day:"Tue", history:"The Wampanoag perspective — closing out the colonial unit.",
-        links:[{l:"Tour of the Wampanoag Homesite",u:"https://www.youtube.com/watch?v=H3ENexOKrmQ"}]},
-      {day:"Wed", history:"Science shifts: what is a habitat?",
-        links:[{l:"Habitats Around the World",u:"https://www.youtube.com/watch?v=_jYjnu5x7bQ"}]},
-      {day:"Thu", history:"Nature walk — signs of habitat. Check the bean plant.", links:[]},
-      {day:"Fri", history:"History shifts: why the colonies wanted independence. Full individual rotation. Library trip if it fits.",
-        links:[{l:"American Revolutionary War for Kids",u:"https://www.youtube.com/watch?v=BWtW0gmh3kg"}]},
-    ]
-  },
-  {
-    week:5, range:"Sep 7–10",
-    theme:{history:"Labor Day (Mon), then Causes of the Revolution", science:"Animal Adaptations"},
-    days:[
-      {day:"Mon", history:"Labor Day — light day, one lesson only, no individual rotation.",
-        links:[{l:"Labor Day Facts for Kids (younger)",u:"https://www.youtube.com/watch?v=u8YrXS-fb1Q"},{l:"Why We Celebrate Labor Day (TED-Ed, older)",u:"https://www.youtube.com/watch?v=YqmPE2HtkyU"}]},
-      {day:"Tue", history:"The Stamp Act & Boston Tea Party — no taxation without representation.",
-        links:[{l:"Boston Tea Party Explained for Kids",u:"https://www.youtube.com/watch?v=WmYqJNmFTOE"}]},
-      {day:"Wed", history:"Nature walk + Science: Animal Adaptations — camouflage, migration, hibernation.",
-        links:[{l:"Animal Adaptations for Kids",u:"https://www.youtube.com/watch?v=m2MibjJgyjs"}]},
-      {day:"Thu", history:"Boston Massacre & Intolerable Acts wrap. Full individual rotation.", links:[]},
-      {day:"Fri", history:"Library / catch-up.", links:[]},
-    ]
-  },
-  {
-    week:6, range:"Sep 14–17",
-    theme:{history:"Lexington & Concord, the Declaration of Independence", science:"Food Chains"},
-    days:[
-      {day:"Mon", history:"KICKOFF DAY: Dance party. Preview the week — this week we ride along with Paul Revere and read the Declaration of Independence! Each kid names one goal. <strong>Skill Spotlight — Life Skill:</strong> measuring/following a recipe together — 5yo pours pre-measured ingredients, 8yo measures cups/spoons, 10yo follows a full simple recipe with supervision, 12yo picks a recipe and runs it independently.", links:[]},
-      {day:"Tue", history:"Paul Revere's ride, Lexington & Concord — the shot heard round the world.",
-        links:[{l:"Paul Revere & Lexington and Concord",u:"https://www.youtube.com/watch?v=h8rTUTsJrrM"}]},
-      {day:"Wed", history:"The Declaration of Independence — why it was written, what it says.",
-        links:[{l:"Declaration of Independence for Kids",u:"https://www.youtube.com/watch?v=qBKotZVmGi8"}]},
-      {day:"Thu", history:"Nature walk + Science: Food Chains — producers, consumers, decomposers.",
-        links:[{l:"Food Chains for Kids (FreeSchool)",u:"https://www.youtube.com/watch?v=hLq2datPo5M"}]},
-      {day:"Fri", history:"Discussion: what did 'all men are created equal' mean, and who was left out? Full individual rotation. Library trip if it fits.", links:[]},
-    ]
-  },
-  {
-    week:7, range:"Sep 21–24",
-    theme:{history:"Valley Forge & Washington's Leadership", science:"Endangered Habitats"},
-    days:[
-      {day:"Mon", history:"KICKOFF DAY: Dance party. Preview the week — winter at Valley Forge, and what happens when a habitat gets hurt. Each kid names one goal. <strong>Skill Spotlight — Money &amp; Enterprise:</strong> 5yo learns to identify coins and their values, 8yo starts a savings jar for something they want, 10yo sorts a want-list into needs vs. wants, 12yo brainstorms one product or service she could make/sell.", links:[]},
-      {day:"Tue", history:"Valley Forge — the winter that almost broke the Continental Army.",
-        links:[{l:"The Story of Valley Forge",u:"https://www.youtube.com/watch?v=gV83Op2Jnv8"}]},
-      {day:"Wed", history:"Science: Endangered species & habitats — what happens when a habitat is damaged.",
-        links:[{l:"What Animals are Endangered?",u:"https://www.youtube.com/watch?v=F7ZvodUuXRE"}]},
-      {day:"Thu", history:"Nature walk — signs of a healthy vs. stressed local habitat.", links:[]},
-      {day:"Fri", history:"Quick oral recap of Revolution events so far. Full individual rotation. Library trip if it fits.", links:[]},
-    ]
-  },
-  {
-    week:8, range:"Sep 28–Oct 1",
-    theme:{history:"Yorktown & the End of the War", science:"Wrapping the Habitats Unit"},
-    days:[
-      {day:"Mon", history:"KICKOFF DAY: Dance party. Preview the week — the last battle of the Revolution, and wrapping up everything we've learned about habitats. Each kid names one goal. <strong>Skill Spotlight — Character &amp; Mindset:</strong> each kid names 3 things they're grateful for, a short growth-mindset discussion (mistakes are part of learning), one kindness challenge to complete for a sibling this week.", links:[]},
-      {day:"Tue", history:"The Battle of Yorktown — the last major battle, Cornwallis's surrender.",
-        links:[{l:"Battle of Yorktown For Kids",u:"https://www.youtube.com/watch?v=22UnDOzQk_o"}]},
-      {day:"Wed", history:"Discussion: the war is won — now what? Winning independence vs. building a government (sets up Constitution for October).", links:[]},
-      {day:"Thu", history:"Nature walk + Science wrap: revisit the habitat dioramas — anything to update now that adaptations/food chains/conservation are covered?", links:[]},
-      {day:"Fri", history:"Full individual rotation + monthly wrap. Fill in the Monthly Snapshot and log portfolio pieces before September closes out. Library/month-end catch-up if it fits.", links:[]},
-    ]
-  },
-  {
-    week:9, range:"Oct 5–9",
-    theme:{history:"Why We Needed a New Government", science:"Intro to the Solar System"},
-    days:[
-      {day:"Mon", history:"KICKOFF DAY: Dance party. Preview the week — why the first American government failed, and our first trip through the Solar System. Each kid names one goal. <strong>Skill Spotlight — Mental Math &amp; Estimation:</strong> 5yo guesses a small pile of objects before counting, 8yo rounds numbers to the nearest 10, 10yo estimates a shopping total before checkout, 12yo does quick percentage/discount estimates.", links:[]},
-      {day:"Tue", history:"The Articles of Confederation — America's first, weak national government, and why it didn't work (no army, no power to tax, no way to enforce laws).",
-        links:[{l:"Articles of Confederation readings (elementary)",u:"https://billofrightsinstitute.org/activities/articles-of-confederation-readings-for-elementary-students/"}]},
-      {day:"Wed", history:"The U.S. Constitution — the fix for those weaknesses.",
-        links:[{l:"Learn All About the U.S. Constitution!",u:"https://www.youtube.com/watch?v=dpYpEU5d99c"}]},
-      {day:"Thu", history:"Nature walk + Science: Intro to the Solar System.",
-        links:[{l:"Exploring Our Solar System",u:"https://www.youtube.com/watch?v=Qd6nLM2QlWw"}]},
-      {day:"Fri", history:"Discussion: what makes a good rule? Tie the government topic to rules at home. Full individual rotation.", links:[]},
-    ]
-  },
-  {
-    week:10, range:"Oct 12–16",
-    theme:{history:"The Three Branches of Government", science:"Earth & the Moon"},
-    days:[
-      {day:"Mon", history:"KICKOFF DAY: Dance party. Preview the week — the three branches of government, and why the moon changes shape. Each kid names one goal. <strong>Skill Spotlight — Memory (Memory Palace):</strong> 5yo plays a memory chain game, 8yo builds a 3-4 stop mini palace in their bedroom, 10yo builds a full 10-stop palace, 12yo uses the palace to memorize Revolutionary War events in order.", links:[]},
-      {day:"Tue", history:"The three branches — Legislative, Executive, Judicial — who makes laws, who enforces them, who interprets them.",
-        links:[{l:"The Legislative Branch",u:"https://www.youtube.com/watch?v=NJw564qLCQ8"}]},
-      {day:"Wed", history:"Discussion: checks and balances — why not let one branch, or one person, have all the power?", links:[]},
-      {day:"Thu", history:"Nature walk + Science: Phases of the Moon.",
-        links:[{l:"Phases of the Moon for Kids",u:"https://www.youtube.com/watch?v=Ie2WRraxdPs"}]},
-      {day:"Fri", history:"Full individual rotation + wrap.", links:[]},
-    ]
-  },
-  {
-    week:11, range:"Oct 19–23",
-    theme:{history:"The Bill of Rights", science:"The Planets"},
-    days:[
-      {day:"Mon", history:"KICKOFF DAY: Dance party. Preview the week — the Bill of Rights, and a tour of the planets. Each kid names one goal. <strong>Skill Spotlight — Ask an Expert:</strong> before/after learning something new this week, each kid writes or says 2-3 genuinely curious questions they'd ask a real expert about it.", links:[]},
-      {day:"Tue", history:"The Bill of Rights — the first 10 amendments, added to protect individual freedoms the Constitution didn't originally spell out.",
-        links:[{l:"The Bill of Rights for Kids",u:"https://www.youtube.com/watch?v=vyqVs0tzRxE"}]},
-      {day:"Wed", history:"Discussion: which right feels most important to you, and why?", links:[]},
-      {day:"Thu", history:"Nature walk + Science: The Planets — inner vs. outer, relative scale of the solar system.",
-        links:[{l:"Planets of our Solar System",u:"https://www.youtube.com/watch?v=d8y8kc317EE"}]},
-      {day:"Fri", history:"Full individual rotation + wrap.", links:[]},
-    ]
-  },
-  {
-    week:12, range:"Oct 26–30",
-    theme:{history:"Wrapping the Founding Documents Unit", science:"Solar System Review + Halloween Pumpkin Science"},
-    days:[
-      {day:"Mon", history:"KICKOFF DAY: Dance party. Preview the week — wrapping up the Constitution unit, and pumpkin science on Friday! Each kid names one goal. <strong>Skill Spotlight — Time Estimation:</strong> guess how long a task will take, then time it and compare — weave into normal moments all week (chores, errands, reading).", links:[]},
-      {day:"Tue", history:"Quick review: Articles → Constitution → Bill of Rights. Discussion: how does any of this connect to rules in our own home?", links:[]},
-      {day:"Wed", history:"Nature walk + Science wrap: quick mental walk back through the solar system unit — Sun, planets, moon phases.", links:[]},
-      {day:"Thu", history:"Full individual rotation + October monthly wrap. Fill in the Monthly Snapshot and log portfolio pieces before the month closes.", links:[]},
-      {day:"Fri", history:"HALLOWEEN SPECIAL — Pumpkin Science, no formal rotation today. Predict and test whether a pumpkin sinks or floats (it floats!). Estimate the seed count before cutting it open, then count in groups of 10 and see who was closest.", links:[]},
-    ]
-  }
+const SIGHT_WORDS = [
+  {word:"the", sentence:"The sun is coming up."},
+  {word:"a", sentence:"A bird is singing outside."},
+  {word:"I", sentence:"I am ready to learn today."},
+  {word:"is", sentence:"Today is a good day."},
+  {word:"it", sentence:"It is time to begin."},
+  {word:"in", sentence:"We are in our home."},
+  {word:"said", sentence:"She said good morning."},
+  {word:"he", sentence:"He ran to the door."},
+  {word:"was", sentence:"It was a bright day."},
+  {word:"you", sentence:"You are learning every day."},
+  {word:"they", sentence:"They went outside to play."},
+  {word:"on", sentence:"The cat sat on the mat."},
+  {word:"we", sentence:"We are together today."},
+  {word:"my", sentence:"My family is right here."},
+  {word:"at", sentence:"Look at the clouds."},
+  {word:"up", sentence:"The bird flew up high."},
+  {word:"and", sentence:"Sun and rain make things grow."},
+  {word:"to", sentence:"We walked to the garden."},
+  {word:"go", sentence:"Let's go outside and look."},
+  {word:"see", sentence:"Can you see the butterfly?"},
+  {word:"come", sentence:"Come and look at this."},
+  {word:"big", sentence:"That is a big tree."},
+  {word:"down", sentence:"The leaves fall down in autumn."},
+  {word:"not", sentence:"Do not forget to look up."},
+  {word:"can", sentence:"You can do hard things."},
+  {word:"like", sentence:"I like to be outside."},
+  {word:"look", sentence:"Look at what is growing."},
+  {word:"make", sentence:"Let us make something today."},
+  {word:"me", sentence:"Help me find the answer."},
+  {word:"one", sentence:"Pick one thing to notice."},
+  {word:"play", sentence:"Play is how we learn."},
+  {word:"red", sentence:"The apple is red and round."},
+  {word:"run", sentence:"Run to the end and back."},
+  {word:"three", sentence:"We have three things to do."},
+  {word:"two", sentence:"Two eyes, two ears, one heart."},
+  {word:"with", sentence:"Learn with someone you love."},
+  {word:"for", sentence:"This day is for learning."},
+  {word:"have", sentence:"We have everything we need."},
+  {word:"little", sentence:"A little seed grows into a tree."},
+  {word:"do", sentence:"Do your best today."}
 ];
 
-// ============ STATE ============
-const todayIdx = new Date().getDay(); // 0 Sun .. 6 Sat
-const DAY_NAMES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-let currentWeekView = parseInt(localStorage.getItem('hs_currentWeekIdx') || '0', 10);
-if(currentWeekView >= WEEKS.length) currentWeekView = 0;
-
-// ============ TABS ============
-document.querySelectorAll('nav.tabs button').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
-    document.querySelectorAll('section.view').forEach(v=>v.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById(btn.dataset.view).classList.add('active');
-  });
-});
-
-// ============ WEEK RENDER ============
-function renderWeek(){
-  const w = WEEKS[currentWeekView];
-  document.getElementById('weekEyebrow').textContent = 'Week ' + w.week;
-  document.getElementById('weekRange').textContent = w.range;
-  document.getElementById('weekTheme').innerHTML =
-    '<p><strong>History:</strong> '+w.theme.history+'</p><p><strong>Science:</strong> '+w.theme.science+'</p>';
-  document.getElementById('weekDays').innerHTML = w.days.map(d=>{
-    const links = d.links.map(x=>`<a class="link-chip" href="${x.u}" target="_blank">${x.l}</a>`).join('');
-    return `<div class="day-row">
-      <div class="day-label">${d.day}</div>
-      <div class="day-body"><p>${d.history}</p>${links?'<div class="links">'+links+'</div>':''}</div>
-    </div>`;
-  }).join('');
-
-  const storedCurrent = localStorage.getItem('hs_currentWeekIdx');
-  document.getElementById('setCurrentWeek').checked = storedCurrent !== null && parseInt(storedCurrent,10) === currentWeekView;
-
-  const adjustNote = document.getElementById('weekAdjustNote');
-  adjustNote.value = localStorage.getItem('hs_weekadjust_' + currentWeekView) || '';
-}
-function bindWeekAdjustNote(){
-  const adjustNote = document.getElementById('weekAdjustNote');
-  adjustNote.addEventListener('input', ()=>{
-    localStorage.setItem('hs_weekadjust_' + currentWeekView, adjustNote.value);
-  });
-}
-document.getElementById('prevWeek').addEventListener('click', ()=>{
-  currentWeekView = (currentWeekView - 1 + WEEKS.length) % WEEKS.length;
-  renderWeek();
-});
-document.getElementById('nextWeek').addEventListener('click', ()=>{
-  currentWeekView = (currentWeekView + 1) % WEEKS.length;
-  renderWeek();
-});
-document.getElementById('setCurrentWeek').addEventListener('change', (e)=>{
-  if(e.target.checked){
-    localStorage.setItem('hs_currentWeekIdx', currentWeekView);
-  } else {
-    localStorage.removeItem('hs_currentWeekIdx');
-  }
-  renderToday();
-});
-
-// ============ TODAY RENDER ============
-function renderToday(){
-  const dateLabel = new Date().toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric'});
-  document.getElementById('todayDateLabel').textContent = dateLabel;
-
-  const storedCurrent = localStorage.getItem('hs_currentWeekIdx');
-  const dayName = DAY_NAMES[todayIdx];
-
-  if(storedCurrent === null){
-    document.getElementById('todayHeading').textContent = "No week marked as current yet";
-    document.getElementById('todayBody').innerHTML = '<p class="muted">Go to <strong>This Week</strong>, find the week you\'re on, and check "Mark this the current week."</p>';
-    return;
-  }
-  const w = WEEKS[parseInt(storedCurrent,10)];
-  const d = w.days.find(x=>x.day === dayName);
-  if(!d){
-    document.getElementById('todayHeading').textContent = "No school today";
-    document.getElementById('todayBody').innerHTML = '<p class="muted">Weekend / off day. Enjoy it.</p>';
-    return;
-  }
-  document.getElementById('todayHeading').textContent = 'Week '+w.week+' — '+d.day;
-  const links = d.links.map(x=>`<a class="link-chip" href="${x.u}" target="_blank">${x.l}</a>`).join('');
-  document.getElementById('todayBody').innerHTML = `<p>${d.history}</p>${links?'<div class="links">'+links+'</div>':''}`;
-}
-
-// ============ DAILY CHECKLIST ============
-const CHECK_ITEMS = [
-  "Read-aloud",
-  "History / Science covered",
-  "5yo individual work",
-  "8yo individual work",
-  "12yo individual work"
+const WORDS = [
+  {word:"luminous",spanish:"luminoso",french:"lumineux",asl:"Spread both open hands near your face then sweep them outward like light radiating out.",tip:"Think of the moon glowing like a big lamp in the sky."},
+  {word:"tenacious",spanish:"tenaz",french:"tenace",asl:"Make a claw shape with your dominant hand and grip firmly in front of your chest.",tip:"Tenacious means you do not give up — like a dog that will not let go of its rope!"},
+  {word:"serene",spanish:"sereno",french:"serein",asl:"Hold both flat hands at chest height and slowly move them outward like smoothing still water.",tip:"Think of a quiet lake with no ripples. That is serene."},
+  {word:"resilient",spanish:"resiliente",french:"resilient",asl:"Make a fist press it down then spring it back up quickly like a ball bouncing.",tip:"A rubber ball is resilient — it bounces right back when you drop it."},
+  {word:"eloquent",spanish:"elocuente",french:"eloquent",asl:"Touch your lips then move your hand forward in a flowing arc as if words are pouring out.",tip:"Someone eloquent chooses beautiful words the way a poet does."},
+  {word:"tranquil",spanish:"tranquilo",french:"tranquille",asl:"Hold both flat hands in front of you palms down and lower them slowly like settling water.",tip:"Your room at bedtime when everything is quiet — that is tranquil."},
+  {word:"fortitude",spanish:"fortaleza",french:"force",asl:"Place your dominant fist on your chest over your heart and hold it firm and steady.",tip:"Fortitude means being brave even when something is hard or scary."},
+  {word:"diligent",spanish:"diligente",french:"diligent",asl:"Hold one flat hand still while your other hand works steadily back and forth above it.",tip:"Diligent means you keep trying and do not stop until the job is done right."},
+  {word:"abundant",spanish:"abundante",french:"abondant",asl:"Hold both open hands palms up then sweep them outward as if overflow is spilling everywhere.",tip:"A garden full of tomatoes has abundant tomatoes — more than you need!"},
+  {word:"reverence",spanish:"reverencia",french:"reverence",asl:"Hold both hands flat at chest height and bow your head gently forward.",tip:"The quiet still feeling in church — that is reverence."},
+  {word:"steadfast",spanish:"firme",french:"ferme",asl:"Place your dominant fist on top of your other fist and hold firm without moving.",tip:"Steadfast means you stay put and do not change your mind when things get hard."},
+  {word:"compassion",spanish:"compasion",french:"compassion",asl:"Place both open hands on your heart then extend them forward toward another person.",tip:"Compassion is when you feel sad because someone else is sad and you want to help."},
+  {word:"gratitude",spanish:"gratitud",french:"gratitude",asl:"Touch your chin with your fingertips then move your hand forward and slightly downward.",tip:"Gratitude is the warm feeling you get when you say thank you and really mean it."},
+  {word:"integrity",spanish:"integridad",french:"integrite",asl:"Draw your dominant index finger straight down the center of your chest from chin to waist.",tip:"Integrity means doing the right thing even when nobody is watching."},
+  {word:"harmony",spanish:"armonia",french:"harmonie",asl:"Interlock the fingers of both hands together and hold them gently in front of you.",tip:"When voices blend in a song without fighting — that is harmony."},
+  {word:"valiant",spanish:"valiente",french:"vaillant",asl:"Place your dominant fist on your chest then thrust it slightly forward as if declaring courage.",tip:"A valiant knight is brave and strong and fights for what is right."},
+  {word:"genuine",spanish:"genuino",french:"authentique",asl:"Hold your dominant hand at your mouth then move it forward slightly as if truth is flowing out.",tip:"Genuine means real — not fake or pretend."},
+  {word:"nurture",spanish:"nutrir",french:"nourrir",asl:"Cup both hands together and move them gently upward as if tending something small.",tip:"When you water a plant every day so it grows — that is nurturing it."},
+  {word:"illuminate",spanish:"iluminar",french:"illuminer",asl:"Start with both hands in loose fists then burst all fingers open and spread them wide.",tip:"A candle illuminates a dark room — it fills the room with light."},
+  {word:"discern",spanish:"discernir",french:"discerner",asl:"Place your index finger at your temple then move it forward slowly as if pulling understanding out.",tip:"To discern means to figure out which thing is true or right."},
+  {word:"ponder",spanish:"reflexionar",french:"mediter",asl:"Hold your index finger at your temple and make small slow circles as if turning a thought over.",tip:"Ponder means to think slowly and carefully about something."},
+  {word:"radiant",spanish:"radiante",french:"radieux",asl:"Place your open hands together then sweep them outward like rays of light spreading.",tip:"Radiant means shining brightly — like the sun on a clear morning."},
+  {word:"humble",spanish:"humilde",french:"humble",asl:"Place your dominant flat hand at your mouth then bring it down and under your other flat hand.",tip:"Humble means you do not brag — you know good things come from God not just yourself."},
+  {word:"fervent",spanish:"ferviente",french:"fervent",asl:"Place both hands on your chest then pull them forward and upward as if your heart is burning.",tip:"Fervent means you care about something with your whole heart."},
+  {word:"jubilant",spanish:"jubiloso",french:"jubilant",asl:"Hold both open hands up and shake them with joy.",tip:"Jubilant means SO happy that you want to jump around!"},
+  {word:"vigilant",spanish:"vigilante",french:"vigilant",asl:"Hold your V hand at eye level and sweep it slowly from side to side as if scanning.",tip:"Vigilant means you are watching carefully — like a guard at a gate."},
+  {word:"gracious",spanish:"gracioso",french:"gracieux",asl:"Touch your heart with open fingertips then sweep your hand forward toward another person.",tip:"Gracious means being kind and welcoming even to someone you do not know well."},
+  {word:"prudent",spanish:"prudente",french:"prudent",asl:"Tap your temple twice with your index finger — showing careful thought before action.",tip:"Prudent means you think before you act — you do not rush into things."},
+  {word:"resolute",spanish:"resuelto",french:"resolu",asl:"Hold one fist steady in front of you and place the other firmly against it — immovable.",tip:"Resolute means your mind is made up and nothing will change it."},
+  {word:"persevere",spanish:"perseverar",french:"perseverer",asl:"Hold both fists in front of you and move them forward steadily like pressing through resistance.",tip:"Persevere means to keep going even when you want to quit."},
+  {word:"flourish",spanish:"florecer",french:"s'epanouir",asl:"Start with both hands closed low then open them and lift them upward like a flower blooming.",tip:"When a plant flourishes it grows tall and healthy. You can flourish too!"},
+  {word:"cherish",spanish:"apreciar",french:"cherir",asl:"Hold both cupped hands gently in front of your chest as if holding something precious.",tip:"Cherish means to love something so much you take extra good care of it."},
+  {word:"inspire",spanish:"inspirar",french:"inspirer",asl:"Touch your chest with your fingertips then lift both open hands upward as if lifting someone else.",tip:"Inspire means to light a spark in someone — to make them want to do something great."},
+  {word:"faithful",spanish:"fiel",french:"fidele",asl:"Tap the side of your dominant F hand against your other F hand twice.",tip:"Faithful means you can be counted on — you keep your word."},
+  {word:"courageous",spanish:"valeroso",french:"courageux",asl:"Hold both fists at your chest then thrust them forward together as if pushing through fear.",tip:"Courageous means doing something brave even when your heart is pounding."},
+  {word:"sanctuary",spanish:"santuario",french:"sanctuaire",asl:"Hold both flat hands forming a protected space then pull them slightly inward as if enclosing something safe.",tip:"A sanctuary is a safe protected place — like a bird sanctuary or a church."},
+  {word:"providence",spanish:"providencia",french:"providence",asl:"Hold one open hand above the other as if something from above is providing what the lower hand needs.",tip:"Providence means trusting that God is providing for you even when you cannot see how."},
+  {word:"stewardship",spanish:"mayordomia",french:"intendance",asl:"Cup both hands together as if holding something entrusted to you then care for it carefully.",tip:"Stewardship means taking good care of something that was given to you."},
+  {word:"fellowship",spanish:"companerismo",french:"fraternite",asl:"Interlock the index fingers of both hands and hold them together side by side.",tip:"Fellowship is the warm good feeling of being together with people you love."},
+  {word:"endurance",spanish:"resistencia",french:"endurance",asl:"Hold both fists in front of you and press them forward slowly against invisible resistance.",tip:"Endurance is what lets a runner finish a long race — sticking with it to the end."},
+  {word:"bountiful",spanish:"abundante",french:"genereux",asl:"Hold both open hands palms up and move them outward as if freely offering abundance.",tip:"Bountiful means there is so much of something — like a bountiful harvest of apples."},
+  {word:"jubilee",spanish:"jubileo",french:"jubile",asl:"Hold both open hands up shaking them with celebration then bring them together in a clap of joy.",tip:"A jubilee is a big celebration — a special time of joy and freedom."}
 ];
-function todayKey(){ return 'hs_checks_' + new Date().toISOString().slice(0,10); }
-function renderChecks(){
-  const saved = JSON.parse(localStorage.getItem(todayKey()) || '{}');
-  const el = document.getElementById('dailyChecks');
-  el.innerHTML = CHECK_ITEMS.map((item,i)=>{
-    const checked = saved[i] ? 'checked' : '';
-    const doneClass = saved[i] ? 'done' : '';
-    return `<div class="check">
-      <input type="checkbox" id="chk${i}" ${checked} data-idx="${i}">
-      <label for="chk${i}" class="${doneClass}">${item}</label>
+
+const PEOPLE_BY_MONTH = {
+  0: [
+    {name:"Nikola Tesla",dates:"1856-1943",desc:"Tesla invented alternating current electricity, the radio, and the Tesla coil. He held over 300 patents and slept only two hours a night.",talk:"If you could invent one thing that does not exist yet, what would it be?"},
+    {name:"Maya Lin",dates:"born 1959",desc:"At 21 years old, Maya Lin won a national competition for the Vietnam Veterans Memorial in Washington DC. She was still a college student. Today it is one of the most visited memorials in the world.",talk:"How do you think it felt to win something that big at 21?"},
+    {name:"George Washington Carver",dates:"1864-1943",desc:"Carver was born into slavery and became one of the most important agricultural scientists in American history. He discovered over 300 uses for the peanut and helped Southern farmers grow new crops.",talk:"What does it mean to make something from almost nothing?"},
+    {name:"Ada Lovelace",dates:"1815-1852",desc:"Ada Lovelace wrote what is considered the first computer program in 1843 — more than 100 years before computers existed. She understood that a machine could do more than math.",talk:"How do you think she imagined something that had never been built?"},
+    {name:"Frank Lloyd Wright",dates:"1867-1959",desc:"Wright designed over 1,000 buildings in his lifetime, including Fallingwater — a house built directly over a waterfall. He believed buildings should grow out of the land around them.",talk:"What would you build if you could build anything?"},
+    {name:"Marie Curie",dates:"1867-1934",desc:"Marie Curie was the first woman to win a Nobel Prize, and the only person to win Nobel Prizes in two different sciences — physics and chemistry. She discovered two elements.",talk:"What do you think it was like to do something no woman had ever done before?"},
+    {name:"Isambard Kingdom Brunel",dates:"1806-1859",desc:"Brunel built the first tunnel under a river, designed the largest ship of his time, and engineered hundreds of miles of railway. He kept detailed sketchbooks and worked 20-hour days.",talk:"What is something you would build if you had no limits?"},
+    {name:"Sojourner Truth",dates:"1797-1883",desc:"Born into slavery, Sojourner Truth escaped to freedom and became one of the most powerful speakers of her time. She made things with words — arguments, speeches, and her famous declaration Ain't I a Woman.",talk:"How can words be something you make and build with?"},
+    {name:"Buckminster Fuller",dates:"1895-1983",desc:"Fuller invented the geodesic dome — a structure so strong it can support its own weight at any size. He kept a diary every 15 minutes for 50 years.",talk:"What problem in your world do you think design could solve?"},
+    {name:"Wangari Maathai",dates:"1940-2011",desc:"Wangari Maathai started the Green Belt Movement in Kenya and organized women to plant over 50 million trees. She was the first African woman to win the Nobel Peace Prize.",talk:"How can something as simple as planting a tree change the world?"}
+  ],
+  1: [
+    {name:"John Muir",dates:"1838-1914",desc:"John Muir walked a thousand miles from Indiana to the Gulf of Mexico just to see what was there. He later helped create the national park system. He called the wilderness a cathedral.",talk:"What is a place you have been that felt like more than just a place?"},
+    {name:"Sacagawea",dates:"1788-1812",desc:"Sacagawea was a Shoshone woman who guided the Lewis and Clark Expedition across the western United States, covering thousands of miles with a newborn baby on her back.",talk:"What do you think it takes to lead people through somewhere no one has mapped?"},
+    {name:"Jane Goodall",dates:"born 1934",desc:"Jane Goodall spent decades living among chimpanzees in Tanzania, observing them so closely that she discovered they use tools — which meant the line between humans and animals was smaller than anyone thought.",talk:"What would you want to observe if you could spend months just watching one thing?"},
+    {name:"Rachel Carson",dates:"1907-1964",desc:"Rachel Carson was a marine biologist who wrote Silent Spring, which warned the world about pesticides. Her writing helped start the modern environmental movement.",talk:"How can writing a book change what people do?"},
+    {name:"Ibn Battuta",dates:"1304-1368",desc:"Ibn Battuta was a Moroccan explorer who traveled 75,000 miles across Africa, Asia, and Europe over 30 years — the longest journey any person made in the ancient world. He wrote it all down.",talk:"What would you want to see if you could travel anywhere for 30 years?"},
+    {name:"Aldo Leopold",dates:"1887-1948",desc:"Aldo Leopold was a forester who argued that land was not just something to use but something to belong to. His book A Sand County Almanac changed how Americans thought about the natural world.",talk:"What does it mean to belong to a place rather than own it?"},
+    {name:"Amelia Earhart",dates:"1897-1937",desc:"Earhart was the first woman to fly solo across the Atlantic Ocean. She disappeared over the Pacific attempting to fly around the world. No one knows exactly what happened.",talk:"Would you do something brave if you knew it might not work out?"},
+    {name:"Charles Darwin",dates:"1809-1882",desc:"Darwin spent five years sailing the world observing plants and animals, then spent 20 more years thinking carefully before publishing his theory of evolution. He was in no hurry to be right.",talk:"Why do you think he waited 20 years before sharing his idea?"},
+    {name:"Robin Wall Kimmerer",dates:"born 1953",desc:"Robin Wall Kimmerer is a botanist and member of the Citizen Potawatomi Nation who writes about plants as if they are kin — beings with gifts to offer if we know how to listen.",talk:"What would change if you thought of plants as relatives instead of resources?"},
+    {name:"Meriwether Lewis",dates:"1774-1809",desc:"Lewis was chosen by President Thomas Jefferson to explore the western United States. He kept detailed journals of every plant, animal, and landscape he encountered.",talk:"If you were journaling a journey, what would you write down?"}
+  ],
+  2: [
+    {name:"Harriet Tubman",dates:"1822-1913",desc:"Harriet Tubman escaped slavery and then returned 13 times to lead over 70 people to freedom. She said she never lost a passenger. She later served as a spy for the Union Army.",talk:"What do you think gave her the courage to go back every time?"},
+    {name:"Dietrich Bonhoeffer",dates:"1906-1945",desc:"Bonhoeffer was a German pastor who refused to support Hitler when most of the German church did. He was arrested and executed just weeks before the war ended. He wrote some of his most important work from prison.",talk:"What do you think it means to stand against something when everyone around you agrees with it?"},
+    {name:"Ruby Bridges",dates:"born 1954",desc:"At six years old, Ruby Bridges was one of the first Black children to integrate an all-white school in New Orleans. She walked past angry crowds every day. She later said she prayed for the people yelling at her.",talk:"How does it change things to pray for people who are being unkind to you?"},
+    {name:"Malala Yousafzai",dates:"born 1997",desc:"Malala was shot by the Taliban for speaking out about girls' right to education in Pakistan. She survived, and at 17 became the youngest person ever to win the Nobel Peace Prize.",talk:"What is something you believe is worth standing up for?"},
+    {name:"William Wilberforce",dates:"1759-1833",desc:"Wilberforce spent 26 years fighting in British Parliament to end the slave trade. He was told it was impossible. He kept going. The Slavery Abolition Act passed three days before he died.",talk:"What does 26 years of working on one thing tell you about the kind of person he was?"},
+    {name:"Corrie ten Boom",dates:"1892-1983",desc:"Corrie ten Boom was a Dutch watchmaker who hid Jewish people in her home during World War II. She was caught and sent to a concentration camp. She survived and spent the rest of her life teaching forgiveness.",talk:"How do you think she learned to forgive people who had done terrible things?"},
+    {name:"Fred Rogers",dates:"1928-2003",desc:"Fred Rogers spent his entire career telling children they were exactly enough just as they were. He fought for public television funding before Congress and won. He was ordained as a Presbyterian minister.",talk:"What do you think made him so sure that kindness was the most important thing?"},
+    {name:"Nelson Mandela",dates:"1918-2013",desc:"Nelson Mandela spent 27 years in prison for opposing apartheid in South Africa. When released he worked toward reconciliation rather than revenge and became the first democratically elected president of South Africa.",talk:"Why do you think he chose reconciliation over revenge?"},
+    {name:"Lottie Moon",dates:"1840-1912",desc:"Lottie Moon was a missionary in China who gave away so much of her own food and money to feed starving people that she died of starvation on a ship coming home. She had asked for nothing for herself.",talk:"What do you think it means to give until there is nothing left?"},
+    {name:"Howard Thurman",dates:"1899-1981",desc:"Howard Thurman was a theologian who mentored Martin Luther King Jr. He wrote about the inner life of the oppressed and believed that stillness and prayer were the foundation of action.",talk:"Why do you think someone like Martin Luther King turned to Howard Thurman for wisdom?"}
+  ],
+  3: [
+    {name:"Johann Sebastian Bach",dates:"1685-1750",desc:"Bach wrote over a thousand pieces of music for the glory of God. He signed his work SDG — short for a Latin phrase meaning To God alone be the glory.",talk:"What does it mean to make something beautiful as a form of worship?"},
+    {name:"Emily Dickinson",dates:"1830-1886",desc:"Emily Dickinson published almost nothing during her lifetime. She lived quietly in Massachusetts and wrote nearly 1,800 poems on scraps of paper. After she died her sister found them all in a drawer.",talk:"Does a poem need to be read by others to matter?"},
+    {name:"Leonardo da Vinci",dates:"1452-1519",desc:"Leonardo kept notebooks full of drawings and ideas for inventions centuries before their time. He was also one of the greatest painters who ever lived. He never finished many things he started.",talk:"Is it okay to be curious about more things than you can ever finish?"},
+    {name:"Phillis Wheatley",dates:"1753-1784",desc:"Phillis Wheatley was brought from West Africa to America as an enslaved child and became the first Black person and the first enslaved person to publish a book of poetry in America.",talk:"What does it mean to make beauty out of an unjust situation?"},
+    {name:"Hildegard of Bingen",dates:"1098-1179",desc:"Hildegard was a German abbess who composed music, wrote theology, studied medicine, and created an invented language — all in the 12th century.",talk:"What does her life tell you about what women were doing long before history recorded them?"},
+    {name:"Vincent van Gogh",dates:"1853-1890",desc:"Van Gogh sold only one painting during his lifetime and struggled most of his life. He wrote thousands of letters to his brother Theo. After he died his paintings became some of the most beloved in the world.",talk:"What do you think about making something beautiful that you will not see succeed?"},
+    {name:"Mary Oliver",dates:"1935-2019",desc:"Mary Oliver spent her life walking slowly through nature and writing poems about what she found there. She believed attention was the beginning of devotion.",talk:"What is something outside that you have never paid careful attention to?"},
+    {name:"Wendell Berry",dates:"born 1934",desc:"Wendell Berry is a Kentucky farmer and writer who has spent his life on the same land his family has farmed for generations. He writes that how we treat the land reflects how we treat each other.",talk:"What does your land outside tell you about what matters?"},
+    {name:"Makoto Fujimura",dates:"born 1960",desc:"Makoto Fujimura is a contemporary artist who uses ancient Japanese painting techniques. He writes about how art can act as a peacemaker between cultures and people.",talk:"How do you think art can bring people together after something terrible?"},
+    {name:"Miriam",dates:"Ancient",desc:"Miriam was the sister of Moses who led the Israelite women in song and dance after the crossing of the Red Sea. She is considered one of the earliest named women artists in human history.",talk:"Why do you think music and movement were the response to something so enormous?"}
+  ],
+  4: [
+    {name:"Rosalind Franklin",dates:"1920-1958",desc:"Rosalind Franklin produced the X-ray photograph that revealed the structure of DNA — one of the most important scientific images ever taken. Watson and Crick used her data without her knowledge.",talk:"What do you think it means for someone to do important work that others get credit for?"},
+    {name:"Katherine Johnson",dates:"1918-2020",desc:"Katherine Johnson was a NASA mathematician whose calculations made the first moon landing possible. When astronaut John Glenn insisted she verify the computer's numbers before his flight, she did — by hand.",talk:"What do you think it meant to John Glenn that he trusted her more than a computer?"},
+    {name:"Gregor Mendel",dates:"1822-1884",desc:"Mendel was an Austrian monk who discovered the laws of heredity by growing peas in his monastery garden for eight years. He was ignored during his lifetime. His work was rediscovered 16 years after he died.",talk:"Why do you think it sometimes takes a long time for a true discovery to be recognized?"},
+    {name:"Temple Grandin",dates:"born 1947",desc:"Temple Grandin is autistic and thinks in pictures rather than words. She revolutionized livestock handling systems and writes about how her different way of thinking is an advantage in problem-solving.",talk:"What does her life tell you about different ways of thinking?"},
+    {name:"Henrietta Lacks",dates:"1920-1951",desc:"Henrietta Lacks was a Black woman whose cancer cells were taken without her knowledge in 1951. Those cells have never stopped dividing and have been used in virtually every major medical discovery since.",talk:"What do you think about the fact that so many lives were saved by something taken without permission?"},
+    {name:"Carl Sagan",dates:"1934-1996",desc:"Carl Sagan was an astronomer who made the universe feel personal. He wrote and narrated Cosmos, watched by 500 million people. He believed science and wonder belonged together.",talk:"What is something about the universe that makes you feel wonder?"},
+    {name:"Mary Anning",dates:"1799-1847",desc:"Mary Anning discovered some of the most important dinosaur fossils ever found on the cliffs of England — starting when she was 12 years old. She had no formal education and was a woman, so male scientists often took credit for her work.",talk:"What kept her going out to those cliffs every day?"},
+    {name:"George Washington Carver",dates:"1864-1943",desc:"Carver said he asked God to show him the secrets of the universe but God told him he was too small for that. So he asked to show him the secrets of the peanut — and changed American agriculture forever.",talk:"What does asking a small question instead of a big one tell you about how discovery works?"},
+    {name:"Chien-Shiung Wu",dates:"1912-1997",desc:"Chien-Shiung Wu was a Chinese-American physicist who disproved a major law of physics in 1956. Her male colleagues won the Nobel Prize for the theory. She was not included.",talk:"What do you think she felt knowing her work earned a prize she was not given?"},
+    {name:"Nikola Tesla",dates:"1856-1943",desc:"Tesla held over 300 patents and imagined wireless electricity for the entire world in 1900. He died alone in a hotel room with no money. His ideas powered the 20th century.",talk:"What does it mean to have ideas so far ahead of your time that the world is not ready for them?"}
+  ],
+  5: [
+    {name:"Martin Luther King Jr.",dates:"1929-1968",desc:"King led the American Civil Rights Movement through nonviolent protest and preaching. His Letter from Birmingham Jail is one of the most powerful pieces of writing in American history. He was 39 when he was killed.",talk:"What do you think gave him the strength to keep going when things were so dangerous?"},
+    {name:"Fannie Lou Hamer",dates:"1917-1977",desc:"Fannie Lou Hamer was a sharecropper's daughter who became one of the most powerful voices for voting rights in America. She was beaten for trying to register to vote and went on to testify before the entire country.",talk:"What does it mean to refuse to be silent when people try to silence you?"},
+    {name:"Desmond Tutu",dates:"1931-2021",desc:"Archbishop Desmond Tutu led the Truth and Reconciliation Commission in South Africa after apartheid — a process where victims and perpetrators met face to face. He believed reconciliation was more powerful than punishment.",talk:"What does it take to forgive someone who has done something terrible?"},
+    {name:"Dorothy Day",dates:"1897-1980",desc:"Dorothy Day cofounded the Catholic Worker Movement which fed and housed thousands of poor people in New York City. She was also jailed multiple times for protesting war. She lived in voluntary poverty her entire life.",talk:"What do you think it means to choose to be poor when you do not have to be?"},
+    {name:"Harriet Beecher Stowe",dates:"1811-1896",desc:"Harriet Beecher Stowe wrote Uncle Tom's Cabin in 1852, a novel so powerful that Abraham Lincoln reportedly called her the little woman who wrote the book that started this great war.",talk:"Can you think of a book or story that changed how people thought about something important?"},
+    {name:"William Tyndale",dates:"1494-1536",desc:"Tyndale translated the Bible into English so ordinary people could read it — which was illegal at the time. He was burned at the stake for it. Many English phrases we still use came from his translation.",talk:"What does it mean to give people access to something so important that it costs you your life?"},
+    {name:"Sojourner Truth",dates:"1797-1883",desc:"Born into slavery, Sojourner Truth walked away from her enslaver, sued to get her son back in court, and became one of the most electrifying preachers of her time. She chose her own name.",talk:"What does choosing your own name mean to someone who was never supposed to have freedom?"},
+    {name:"Howard Thurman",dates:"1899-1981",desc:"Howard Thurman was a theologian and mystic who mentored Martin Luther King Jr. He believed that stillness and prayer were the foundation of action.",talk:"Why do you think someone like Martin Luther King turned to Howard Thurman for wisdom?"},
+    {name:"Josephine Butler",dates:"1828-1906",desc:"Josephine Butler spent her life fighting for the rights of women that society had decided not to care about, at a time when almost no one in her world would even acknowledge the problem.",talk:"What does it mean to fight for people that society has decided not to care about?"},
+    {name:"Cornel West",dates:"born 1953",desc:"Cornel West is a philosopher who believes that love is the most powerful political force. He has spent his life asking hard questions about race, democracy, and justice.",talk:"What does it mean to believe that love is political?"}
+  ],
+  6: [
+    {name:"Ida B. Wells",dates:"1862-1931",desc:"Ida B. Wells was a journalist who documented lynching in the American South at a time when no one else would. She carried a gun for protection and kept publishing. She helped found the NAACP.",talk:"What does it take to document something terrible when you know it puts you in danger?"},
+    {name:"Elizabeth Blackwell",dates:"1821-1910",desc:"Elizabeth Blackwell was the first woman to receive a medical degree in the United States. She was rejected by 29 medical schools before one accepted her. She graduated first in her class.",talk:"What kept her applying after being told no 29 times?"},
+    {name:"Katharine Graham",dates:"1917-2001",desc:"Katharine Graham took over the Washington Post after her husband died and had never run a business before. She made the decision to publish the Pentagon Papers and Watergate stories — both of which changed American history.",talk:"What do you think it felt like to make a decision that big?"},
+    {name:"Flannery O'Connor",dates:"1925-1964",desc:"Flannery O'Connor wrote short stories set in the American South that were grotesque, funny, and deeply Catholic. She raised peacocks on her farm in Georgia and wrote every morning for two hours, every day, even when she was dying.",talk:"What does two hours every single morning tell you about how she thought about her work?"},
+    {name:"Fanny Crosby",dates:"1820-1915",desc:"Fanny Crosby was blind from six weeks old and went on to write over 9,000 hymns. She said she was grateful to be blind because the first face she would ever see was the face of God.",talk:"What do you think about choosing gratitude in a situation most people would call a loss?"},
+    {name:"Dolores Huerta",dates:"born 1930",desc:"Dolores Huerta cofounded the United Farm Workers and spent her life fighting for fair wages and safe conditions for farmworkers. Her famous phrase Si se puede means Yes we can.",talk:"What is something that feels impossible that you still think could change?"},
+    {name:"Zora Neale Hurston",dates:"1891-1960",desc:"Zora Neale Hurston was an anthropologist and novelist who collected African American folklore and wrote about Black life with joy and complexity. She died in poverty and was buried in an unmarked grave.",talk:"What does it mean for a writer to be rediscovered and celebrated after they are gone?"},
+    {name:"Annie Dillard",dates:"born 1945",desc:"Annie Dillard spent a year watching one creek in Virginia and wrote a Pulitzer Prize-winning book about it. She believed that paying attention was a spiritual practice.",talk:"What would you see if you paid close attention to one small place for a whole year?"},
+    {name:"Hildegard of Bingen",dates:"1098-1179",desc:"Hildegard was a medieval abbess who composed music, wrote theology, studied medicine, and created an invented language — all in the 12th century.",talk:"What does her life say about what women were capable of when given even a little room?"},
+    {name:"Simone Weil",dates:"1909-1943",desc:"Simone Weil was a French philosopher who left her university teaching position to work in a factory alongside laborers. She believed you could not understand suffering without experiencing it.",talk:"What does it mean to choose to stand where others are suffering?"}
+  ],
+  7: [
+    {name:"Wendell Berry",dates:"born 1934",desc:"Wendell Berry has farmed the same land in Kentucky that his family has worked for generations. He writes that how we treat the soil reflects how we treat each other. He still uses a horse instead of a tractor.",talk:"What does it mean to choose the slower, harder way when a faster way exists?"},
+    {name:"Liberty Hyde Bailey",dates:"1858-1954",desc:"Liberty Hyde Bailey was a botanist and farmer from Michigan who wrote The Holy Earth in 1915, arguing that caring for land was a sacred obligation.",talk:"What does it mean to call the earth holy?"},
+    {name:"Fannie Lou Hamer",dates:"1917-1977",desc:"After her civil rights work, Fannie Lou Hamer started a cooperative farm in Mississippi where she grew food for her community and organized poor families to grow their own. She believed land was freedom.",talk:"Why do you think owning land felt like freedom to her?"},
+    {name:"Cesar Chavez",dates:"1927-1993",desc:"Cesar Chavez grew up in a migrant farmworker family and spent his life organizing agricultural workers for fair wages and safe conditions. He fasted for 36 days as an act of protest.",talk:"What does it mean to use your own body as a form of argument?"},
+    {name:"Luther Burbank",dates:"1849-1926",desc:"Luther Burbank developed over 800 new varieties of plants including the Russet Burbank potato — the most widely grown potato in the world. He worked by crossing plants and selecting the best offspring over many generations.",talk:"What does patience have to do with farming and plant breeding?"},
+    {name:"Black Elk",dates:"1863-1950",desc:"Black Elk was an Oglala Lakota holy man who described the Great Plains as a living relative, not a resource. He said the world is a circle and everything in it is related.",talk:"What changes when you see the land as a relative instead of a resource?"},
+    {name:"Wangari Maathai",dates:"1940-2011",desc:"Wangari Maathai began the Green Belt Movement by asking Kenyan women to plant trees. They planted 50 million. She said environmental work and human rights were the same work.",talk:"How are taking care of the land and taking care of people the same thing?"},
+    {name:"Masanobu Fukuoka",dates:"1913-2008",desc:"Fukuoka was a Japanese farmer who developed do-nothing farming — growing food by working with natural systems rather than against them. His book The One-Straw Revolution influenced farmers around the world.",talk:"What would it look like to do less and get more?"},
+    {name:"Scott Nearing",dates:"1883-1983",desc:"Scott Nearing and his wife Helen left New York City to homestead in Vermont in 1932, building their own stone house and growing almost all their food. He lived to be 100.",talk:"What do you think they gained by giving up comfort and convenience?"},
+    {name:"Eliza Lucas Pinckney",dates:"1722-1793",desc:"Eliza Lucas Pinckney began running three South Carolina plantations at age 16. She successfully cultivated indigo — a blue dye plant — and transformed the South Carolina economy.",talk:"What does it tell you that a 16-year-old was running a plantation and developing a new crop?"}
+  ],
+  8: [
+    {name:"C.S. Lewis",dates:"1898-1963",desc:"C.S. Lewis was an Oxford scholar who wrote The Chronicles of Narnia and Mere Christianity. He said a children's story that can only be enjoyed by children is not a good children's story.",talk:"What is a story you loved as a child that you think adults should read too?"},
+    {name:"Madeleine L'Engle",dates:"1918-2007",desc:"Madeleine L'Engle's novel A Wrinkle in Time was rejected by 26 publishers before it was accepted. It won the Newbery Medal and has been in print for over 60 years.",talk:"What kept her submitting it after 26 rejections?"},
+    {name:"Langston Hughes",dates:"1902-1967",desc:"Langston Hughes was a poet of the Harlem Renaissance who wrote about Black American life with dignity, humor, and sorrow. His poem about a dream deferred is one of the most quoted poems in English.",talk:"What do you think happens to a dream you keep putting off?"},
+    {name:"Laura Ingalls Wilder",dates:"1867-1957",desc:"Laura Ingalls Wilder wrote the Little House on the Prairie series from memory, starting at age 65. She described a childhood of homesteading and a family that made beauty out of difficulty.",talk:"What does your family do that makes difficult things more beautiful?"},
+    {name:"Tolkien",dates:"1892-1973",desc:"J.R.R. Tolkien was an Oxford professor who invented entire languages and spent decades building the world of Middle-earth before publishing The Lord of the Rings. He and C.S. Lewis were close friends.",talk:"What is something you are building slowly that you have not shown anyone yet?"},
+    {name:"Toni Morrison",dates:"1931-2019",desc:"Toni Morrison was the first Black woman to win the Nobel Prize in Literature. She wrote about the interior lives of Black Americans with a depth and beauty no one had achieved before.",talk:"Why do you think it matters that we have stories that reflect who we are?"},
+    {name:"Frederick Douglass",dates:"1818-1895",desc:"Frederick Douglass escaped slavery and became one of the greatest writers of the 19th century. He wrote three autobiographies and said that once you learn to read, no one can enslave your mind.",talk:"What does it mean that he connected reading to freedom?"},
+    {name:"Beatrix Potter",dates:"1866-1943",desc:"Beatrix Potter wrote and illustrated the Peter Rabbit books from her observations of the animals she kept as pets. She later became an expert sheep farmer and donated her farms to the National Trust.",talk:"What is something you know well enough to write a story about?"},
+    {name:"Homer",dates:"c. 800 BC",desc:"Homer composed the Iliad and the Odyssey — two of the oldest poems in the Western world. They were originally sung aloud from memory, passed down for generations before anyone wrote them down.",talk:"What stories in your family have been told so many times they feel like they belong to everyone?"},
+    {name:"Wendell Berry",dates:"born 1934",desc:"Wendell Berry has written novels, poetry, and essays — all rooted in the same small piece of Kentucky land. He believes stories are how a community holds its memory.",talk:"What stories does your family tell that hold your memory together?"}
+  ],
+  9: [
+    {name:"Johann Sebastian Bach",dates:"1685-1750",desc:"Bach wrote music for the glory of God every day of his life. He had 20 children and still produced over 1,000 compositions. He wrote SDG — To God alone be the glory — in the margins of his manuscripts.",talk:"What does it mean to make something beautiful as an act of worship?"},
+    {name:"Alvin Ailey",dates:"1931-1989",desc:"Alvin Ailey founded the Alvin Ailey American Dance Theater and created Revelations — a dance set to African American spirituals that has been seen by more people than almost any other modern dance work.",talk:"How can a dance carry a community's memory?"},
+    {name:"Mahalia Jackson",dates:"1911-1972",desc:"Mahalia Jackson had one of the most powerful voices of the 20th century. She refused to sing anything but gospel music even when offered far more money for other work.",talk:"What does it mean to stay committed to one kind of thing even when something easier is offered?"},
+    {name:"Yo-Yo Ma",dates:"born 1955",desc:"Yo-Yo Ma is a cellist who began performing at age five and has since explored bluegrass, silk road music, and Bach with equal seriousness. He believes music builds bridges between cultures.",talk:"What is a kind of music very different from what you usually hear that you would like to try?"},
+    {name:"Misty Copeland",dates:"born 1982",desc:"Misty Copeland became the first African American female principal dancer at the American Ballet Theatre — after being told her body was wrong for ballet. She started dancing at 13, which is considered very late.",talk:"What does late mean when you are that determined?"},
+    {name:"John Coltrane",dates:"1926-1967",desc:"John Coltrane was a jazz saxophonist who practiced up to 12 hours a day. His album A Love Supreme was offered to God as a spiritual gift. He called music his way of praying.",talk:"What activity feels like a form of prayer or worship for you?"},
+    {name:"Martha Graham",dates:"1894-1991",desc:"Martha Graham created a new form of modern dance and choreographed 181 works across 70 years. She said the body never lies. She danced until she was 75 and choreographed until she died at 96.",talk:"What does it mean that the body never lies?"},
+    {name:"Clara Schumann",dates:"1819-1896",desc:"Clara Schumann was a concert pianist performing professionally at age 11. She was one of the most celebrated musicians in Europe and also composed her own music, though she sometimes doubted her compositions.",talk:"Have you ever doubted something you made that turned out to be good?"},
+    {name:"Bill Monroe",dates:"1911-1996",desc:"Bill Monroe invented bluegrass music in Kentucky — a sound that grew out of Appalachian folk, blues, and gospel. He called it the music of ancient tones. Those tones can be heard today in southern Indiana.",talk:"What kind of music feels like it belongs to the place where you live?"},
+    {name:"Fela Kuti",dates:"1938-1997",desc:"Fela Kuti was a Nigerian musician who created Afrobeat and used his music to criticize the Nigerian military government. He was arrested over 200 times. His music was a form of resistance.",talk:"How can music be a form of protest?"}
+  ],
+  10: [
+    {name:"Jesse Owens",dates:"1913-1980",desc:"Jesse Owens won four gold medals at the 1936 Olympics in Berlin while Adolf Hitler watched. He said the only way to overcome prejudice is to outrun it.",talk:"What does it mean to respond to hatred with excellence?"},
+    {name:"Wilma Rudolph",dates:"1940-1994",desc:"Wilma Rudolph was the fastest woman in the world in 1960. She had been partially paralyzed as a child from polio. She was the first American woman to win three gold medals in a single Olympics.",talk:"What do you think about someone told they might never walk normally becoming the fastest woman in the world?"},
+    {name:"Roger Bannister",dates:"1929-2018",desc:"Roger Bannister ran the first mile in under four minutes in 1954 — something doctors said was physically impossible. Within one year, 37 other runners had also broken the four-minute mile.",talk:"What do you think happened when everyone realized it was possible?"},
+    {name:"Junko Tabei",dates:"1939-2016",desc:"Junko Tabei was the first woman to summit Mount Everest. She was a small quiet Japanese librarian who began climbing because it was cheaper than other hobbies. She later climbed the highest peak on every continent.",talk:"What is something you have underestimated about yourself?"},
+    {name:"Billie Jean King",dates:"born 1943",desc:"Billie Jean King was one of the greatest tennis players of her time and spent her career fighting for equal pay for women athletes. She famously beat Bobby Riggs in the 1973 Battle of the Sexes match watched by 90 million people.",talk:"What do you think she was trying to prove and to whom?"},
+    {name:"Jim Thorpe",dates:"1888-1953",desc:"Jim Thorpe was a Sac and Fox Native American who won two Olympic gold medals in 1912 and played professional baseball, football, and basketball. He was stripped of his medals on a technicality. They were restored after he died.",talk:"What does his story say about how athletes from marginalized communities are treated?"},
+    {name:"Florence Griffith-Joyner",dates:"1959-1998",desc:"FloJo set the world records for the 100 and 200 meter sprints in 1988 that still stand today. She designed her own racing outfits and ran in ways that made her look like art.",talk:"What does it mean to bring beauty to something competitive?"},
+    {name:"Pelé",dates:"1940-2022",desc:"Pelé grew up in poverty in Brazil, practicing soccer with a grapefruit when he could not afford a ball. He became the only player to win three World Cups and is considered the greatest player who ever lived.",talk:"What did he have that no one could take away from him even when he had nothing?"},
+    {name:"Amelia Earhart",dates:"1897-1937",desc:"Earhart was the first woman to fly solo across the Atlantic and the first person to fly solo from Hawaii to California. She said the most difficult thing is the decision to act.",talk:"What decision have you been putting off because it seems too hard?"},
+    {name:"Harriet Chalmers Adams",dates:"1875-1937",desc:"Harriet Chalmers Adams was a travel writer and explorer who traveled 40,000 miles across Latin America on horseback and became the first woman allowed to visit the front lines of World War I as a journalist.",talk:"What do you think she had to fight against to be taken seriously?"}
+  ],
+  11: [
+    {name:"Augustine of Hippo",dates:"354-430",desc:"Augustine was one of the most influential thinkers in Christian history. He wrote Confessions — one of the first autobiographies ever written — and began it: Our heart is restless until it rests in Thee.",talk:"What does it mean for a heart to be restless?"},
+    {name:"Hannah Arendt",dates:"1906-1975",desc:"Hannah Arendt was a German-Jewish philosopher who escaped the Holocaust and spent her life thinking about totalitarianism, evil, and what it means to think. She coined the phrase the banality of evil.",talk:"What do you think she meant that evil can be ordinary and everyday?"},
+    {name:"Blaise Pascal",dates:"1623-1662",desc:"Pascal was a mathematician, physicist, and philosopher who wrote: The heart has reasons of which reason knows nothing.",talk:"What do you think he meant by that?"},
+    {name:"Simone Weil",dates:"1909-1943",desc:"Simone Weil believed that paying attention — really paying attention — was the highest form of love and the foundation of all learning. She said most of us go through life without ever truly attending to anything.",talk:"What is something you have never truly paid attention to?"},
+    {name:"G.K. Chesterton",dates:"1874-1936",desc:"Chesterton was a journalist and writer who said that the world will never starve for want of wonders, but only for want of wonder. He was always looking for paradox.",talk:"What is something ordinary that is actually extraordinary when you look closely?"},
+    {name:"C.S. Lewis",dates:"1898-1963",desc:"Lewis was an atheist professor at Oxford who converted to Christianity and spent the rest of his life writing about what he found there. He said imagination is the organ of meaning.",talk:"What is the difference between knowing something is true and knowing what it means?"},
+    {name:"Frederick Douglass",dates:"1818-1895",desc:"Douglass said that the relationship between education and freedom was the most important truth he ever discovered. He taught himself to read in secret as a slave and called it the pathway from slavery to freedom.",talk:"What does it mean to you that learning and freedom are connected?"},
+    {name:"Dallas Willard",dates:"1935-2013",desc:"Dallas Willard was a philosopher who argued that spiritual formation — becoming a different kind of person — was the most serious intellectual project a human being could undertake. He grew up in rural Missouri.",talk:"What kind of person do you want to become, and what are you doing about it?"},
+    {name:"Sojourner Truth",dates:"1797-1883",desc:"Sojourner Truth said: I feel safe in the midst of my enemies, for the truth is all powerful and will prevail. She had no formal education and became one of the most powerful thinkers of the 19th century.",talk:"What does it mean to trust truth more than safety?"},
+    {name:"Cornel West",dates:"born 1953",desc:"Cornel West is a philosopher who teaches that love is a political act. He was raised in a Black Baptist church and believes that the examined life and the life of justice are the same life.",talk:"What does it mean to examine your own life?"}
+  ]
+};
+
+const POEMS = [
+  {title:"Nothing Gold Can Stay",author:"Robert Frost",lines:["Nature's first green is gold,","Her hardest hue to hold.","Her early leaf's a flower;","But only so an hour.","Then leaf subsides to leaf.","So Eden sank to grief,","So dawn goes down to day.","Nothing gold can stay."],question:"What one word stayed with you?"},
+  {title:"Who Has Seen the Wind?",author:"Christina Rossetti",lines:["Who has seen the wind?","Neither I nor you:","But when the leaves hang trembling,","The wind is passing through.","Who has seen the wind?","Neither you nor I:","But when the trees bow down their heads,","The wind is passing by."],question:"What one word stayed with you?"},
+  {title:"Hope",author:"Emily Dickinson",lines:["Hope is the thing with feathers","That perches in the soul,","And sings the tune without the words,","And never stops at all."],question:"What one word stayed with you?"},
+  {title:"The Road Not Taken (stanza one)",author:"Robert Frost",lines:["Two roads diverged in a yellow wood,","And sorry I could not travel both","And be one traveler, long I stood","And looked down one as far as I could","To where it bent in the undergrowth;"],question:"What one word stayed with you?"},
+  {title:"Pied Beauty",author:"Gerard Manley Hopkins",lines:["Glory be to God for dappled things —","For skies of couple-colour as a brinded cow;","For rose-moles all in stipple upon trout that swim;","Fresh-firecoal chestnut-falls; finches' wings;"],question:"What one word stayed with you?"},
+  {title:"The Peace of Wild Things",author:"Wendell Berry",lines:["When despair grows in me","and I wake in the night at the least sound","in fear of what my life and my children's lives may be,","I go and lie down where the wood drake","rests in his beauty on the water,","and the great heron feeds."],question:"What one word stayed with you?"},
+  {title:"Love (III)",author:"George Herbert",lines:["Love bade me welcome; yet my soul drew back,","Guilty of dust and sin.","But quick-eyed Love, observing me grow slack","From my first entrance in,","Drew nearer to me, sweetly questioning,","If I lacked anything."],question:"What one word stayed with you?"},
+  {title:"The Swing",author:"Robert Louis Stevenson",lines:["How do you like to go up in a swing,","Up in the air so blue?","Oh, I do think it the pleasantest thing","Ever a child can do!","Up in the air and over the wall,","Till I can see so wide,","Rivers and trees and cattle and all","Over the countryside —"],question:"What one word stayed with you?"},
+  {title:"God's Grandeur",author:"Gerard Manley Hopkins",lines:["The world is charged with the grandeur of God.","It will flame out, like shining from shook foil;","It gathers to a greatness, like the ooze of oil","Crushed."],question:"What one word stayed with you?"},
+  {title:"Abide with Me",author:"Henry F. Lyte",lines:["Abide with me; fast falls the eventide;","The darkness deepens; Lord, with me abide!","When other helpers fail and comforts flee,","Help of the helpless, O abide with me."],question:"What one word stayed with you?"},
+  {title:"Stopping by Woods",author:"Robert Frost",lines:["The woods are lovely, dark and deep,","But I have promises to keep,","And miles to go before I sleep,","And miles to go before I sleep."],question:"What one word stayed with you?"},
+  {title:"I'm Nobody",author:"Emily Dickinson",lines:["I'm Nobody! Who are you?","Are you — Nobody — too?","Then there's a pair of us!","Don't tell! they'd advertise —"],question:"What one word stayed with you?"},
+  {title:"The Lake Isle of Innisfree",author:"W.B. Yeats",lines:["I will arise and go now, and go to Innisfree,","And a small cabin build there, of clay and wattles made;","Nine bean rows will I have there, a hive for the honey bee,","And live alone in the bee-loud glade."],question:"What one word stayed with you?"},
+  {title:"Psalm 23 (KJV)",author:"King David",lines:["The Lord is my shepherd; I shall not want.","He maketh me to lie down in green pastures:","He leadeth me beside the still waters.","He restoreth my soul."],question:"What one word stayed with you?"},
+  {title:"Song of Myself",author:"Walt Whitman",lines:["I celebrate myself, and sing myself,","And what I assume you shall assume,","For every atom belonging to me","As good belongs to you."],question:"What one word stayed with you?"},
+  {title:"The Summer Day",author:"Mary Oliver",lines:["Who made the world?","Who made the swan, and the black bear?","Who made the grasshopper?","Tell me, what is it you plan to do","with your one wild and precious life?"],question:"What one word stayed with you?"},
+  {title:"A Psalm of Life",author:"Henry Wadsworth Longfellow",lines:["Life is real! Life is earnest!","And the grave is not its goal;","Dust thou art, to dust returnest,","Was not spoken of the soul."],question:"What one word stayed with you?"},
+  {title:"The Daffodils",author:"William Wordsworth",lines:["I wandered lonely as a cloud","That floats on high o'er vales and hills,","When all at once I saw a crowd,","A host of golden daffodils."],question:"What one word stayed with you?"},
+  {title:"Invictus",author:"William Ernest Henley",lines:["Out of the night that covers me,","Black as the pit from pole to pole,","I thank whatever gods may be","For my unconquerable soul."],question:"What one word stayed with you?"},
+  {title:"Trees",author:"Joyce Kilmer",lines:["I think that I shall never see","A poem lovely as a tree.","A tree whose hungry mouth is prest","Against the earth's sweet flowing breast."],question:"What one word stayed with you?"},
+  {title:"Morning",author:"Wendell Berry",lines:["The sky begins to lighten;","the hills emerge from dark.","A rooster crows. A cock","pheasant shouts from the cane."],question:"What one word stayed with you?"},
+  {title:"Ecclesiastes 3",author:"Scripture",lines:["To everything there is a season,","and a time to every purpose under heaven:","A time to be born, and a time to die;","a time to plant, and a time to pluck up that which is planted."],question:"What one word stayed with you?"},
+  {title:"Miriam's Song",author:"Traditional",lines:["Sing to the Lord, for he is highly exalted.","The horse and its rider he has hurled into the sea.","The Lord is my strength and my defense;","he has become my salvation."],question:"What one word stayed with you?"},
+  {title:"Nothing is Lost",author:"Noel Coward",lines:["Deep in our sub-conscious, we are told","Lie all our memories, lie all the notes","Of all the music we have ever heard","And all the phrases those we loved have spoken."],question:"What one word stayed with you?"},
+  {title:"Stopping by Woods on a Snowy Evening",author:"Robert Frost",lines:["Whose woods these are I think I know.","His house is in the village though;","He will not see me stopping here","To watch his woods fill up with snow."],question:"What one word stayed with you?"}
+];
+
+const NATURE = [
+  {title:"Trees talk underground",fact:"Trees share food and warnings through a vast web of fungi woven between their roots — scientists call it the Wood Wide Web. When one tree is attacked by insects it sends chemical warnings to its neighbors.",wonder:"If trees can warn each other, what else might plants be doing?",littles:"Put your hand on a tree trunk. It is part of a hidden conversation happening right now."},
+  {title:"Honey never spoils",fact:"Archaeologists found 3,000-year-old honey in Egyptian tombs that was still edible. Honey's chemistry — low moisture, high acidity, and natural hydrogen peroxide — makes it nearly impossible for bacteria to survive in it.",wonder:"What other things in nature act as their own preservatives?",littles:"Touch a spoonful of honey. It looks simple but inside it is a fortress bacteria cannot enter."},
+  {title:"Every snowflake has six sides",fact:"Every snowflake has exactly six sides no matter how big or small. This happens because water molecules bond into hexagonal rings when they freeze. Despite this one rule no two snowflakes have ever been identical.",wonder:"How can one simple rule produce infinite variety?",littles:"Try drawing a six-sided snowflake. Every snowflake in the world follows this same rule."},
+  {title:"A caterpillar dissolves itself",fact:"When a caterpillar forms a chrysalis most of its body actually dissolves into a kind of living soup — then entirely reorganizes into a butterfly. Almost no part of the caterpillar becomes the butterfly directly.",wonder:"If it dissolves and becomes something new, is it still the same creature?",littles:"A butterfly was once a caterpillar that melted and rebuilt itself entirely. Think about that."},
+  {title:"Roots grow down because of gravity",fact:"Plant roots detect gravity using tiny starch-filled cells that act like little weights. These cells sink toward the pull of gravity telling the root which direction is down. Rotate a plant and its roots curve back down within hours.",wonder:"How do plants sense something they have no eyes or ears to detect?",littles:"Plants know which way is down even in the dark."},
+  {title:"Fireflies make cold light",fact:"The glow of a firefly is nearly 100 percent efficient — almost no energy is wasted as heat. A regular light bulb wastes 90 percent of its energy as heat. Fireflies produce light through a chemical reaction involving luciferin — Latin for light.",wonder:"What could we make differently if we could generate light with no heat?",littles:"On a summer night you can see fireflies making cold light — no heat, just pure glow."},
+  {title:"Dolphins sleep with one eye open",fact:"Dolphins cannot fully sleep the way humans do. They shut down half their brain at a time while the other half stays awake to breathe and watch for danger. The two halves take turns resting.",wonder:"What other animals might sleep differently from the way you do?",littles:"A dolphin is always half awake. Even when resting, one eye is watching."},
+  {title:"A cloud can weigh over a million pounds",fact:"A typical cumulus cloud contains about 500 tons of water droplets suspended in the air. The droplets are so tiny and spread out that the cloud floats, but the total weight of water inside it is staggering.",wonder:"If clouds weigh so much, why do they float?",littles:"Look at a cloud today. It looks light and soft but it is carrying more water than a swimming pool."},
+  {title:"Wolves can change rivers",fact:"When wolves were reintroduced to Yellowstone they changed where deer grazed, which allowed riverside plants to regrow, which stabilized riverbanks, which changed the actual course of rivers. One predator reshaped an entire landscape.",wonder:"What other animal might change the land around you if it returned?",littles:"Wolves came back to Yellowstone and the rivers moved. That is how connected everything in nature is."},
+  {title:"Butterflies taste with their feet",fact:"Butterflies have taste sensors on their legs so they can tell whether a plant is edible the moment they land. Female butterflies use this to find the right plant to lay their eggs on.",wonder:"If you could taste with your feet, how would that change how you moved?",littles:"The next time you see a butterfly land on a leaf, it is tasting it right at that moment."},
+  {title:"Trees can tell time without clocks",fact:"Many trees track seasons by measuring the length of daylight, not temperature. Even in a warm winter they will not bloom early because they are counting hours of light each day, waiting for the right moment.",wonder:"How do you think trees developed this ability?",littles:"A tree knows what season it is by watching how long the sun is in the sky."},
+  {title:"Crows remember human faces",fact:"Crows can recognize individual human faces and remember them for years. They share this information with other crows. If you treat a crow poorly it may warn other crows about you.",wonder:"What does it mean for an animal to hold a grudge?",littles:"Crows know who their friends are and who has been unkind to them. They remember."},
+  {title:"Flamingos are white without their food",fact:"Flamingos are not born pink and do not stay pink without their diet. Their pink color comes entirely from pigments in the algae and shrimp they eat. A flamingo that stopped eating those foods would gradually turn white.",wonder:"What other animals get their color from what they eat?",littles:"A flamingo is pink because of what it eats. You are what you eat — and so is a flamingo."},
+  {title:"Lightning strikes Earth 100 times per second",fact:"About 100 bolts of lightning strike Earth every second — 8 million strikes per day. Most lightning hits the ocean, mountains, or open land far from people.",wonder:"Where do you think most lightning strikes happen and why?",littles:"Right now somewhere on Earth lightning is striking about 100 times every single second."},
+  {title:"Sharks are older than trees",fact:"Sharks have existed for over 450 million years — about 90 million years before the first trees appeared. Sharks survived all five mass extinction events in Earth's history including the one that killed the dinosaurs.",wonder:"What qualities allowed sharks to survive every mass extinction?",littles:"Sharks were swimming in the ocean before there were any trees on land. They are older than forests."},
+  {title:"Polar bears have black skin",fact:"Polar bear fur is not white — each hair is transparent and hollow. The fur scatters light the way snow does, making it appear white. Underneath the fur the skin is completely black, which absorbs heat from the sun.",wonder:"How many other things appear to be a color they technically are not?",littles:"A polar bear looks white but its skin is black underneath. Its fur has no color at all."},
+  {title:"Hummingbirds enter a state like death each night",fact:"To survive cold nights hummingbirds enter a state called torpor. Their heart rate drops from over 1,000 beats per minute to as low as 50, their temperature drops dramatically, and they appear almost lifeless. They revive each morning.",wonder:"What is the difference between torpor and sleep?",littles:"Every night a hummingbird goes almost completely still and cold. Every morning it wakes back up."},
+  {title:"The Amazon rainforest makes its own rain",fact:"Trees in the Amazon release water vapor that forms clouds which then rain back down on the forest. The forest creates its own weather system. Scientists call this moisture recycling.",wonder:"What would happen to rainfall if large sections of the forest were removed?",littles:"The Amazon rainforest makes its own rain. The trees breathe out water and the water falls back on them."},
+  {title:"Soil is alive",fact:"A single teaspoon of healthy soil contains more living organisms than there are people on Earth. Soil is a living system of bacteria, fungi, worms, and minerals. Plants grow through a relationship with it.",wonder:"What happens to soil when the living things inside it disappear?",littles:"Pick up a pinch of soil. You are holding more tiny living things than there are people on Earth."},
+  {title:"Seeds can wait for decades",fact:"A seed contains everything needed to become a plant, suspended in a state of waiting. Germination begins when water, warmth, and oxygen trigger the embryo to wake. A 2,000-year-old seed found at an archaeological site was once successfully sprouted.",wonder:"What does it mean for something living to be in a state of waiting?",littles:"A seed is a living thing that is asleep — waiting for exactly the right moment to wake up."}
+];
+
+const BODY_FACTS = [
+  {title:"Your heart beats 100,000 times a day",fact:"Your heart pumps about 2,000 gallons of blood through your body every single day without you telling it to. It starts beating about 22 days after conception — before you were even born.",wonder:"Put your hand on your heart right now. Count beats for 10 seconds. Multiply by 6. That is your resting heart rate."},
+  {title:"Your lungs have 600 million air pockets",fact:"Your lungs contain tiny air sacs called alveoli — about 600 million of them. If you spread them out flat they would cover a tennis court. Every breath exchanges oxygen for carbon dioxide across those surfaces.",wonder:"Take the slowest breath you can. How long can you stretch one inhale?"},
+  {title:"Your bones are living tissue",fact:"Bones are not hard and dead — they are living tissue threaded with blood vessels, constantly rebuilding themselves. Your body replaces almost your entire skeleton over the course of ten years.",wonder:"What does it mean that you are literally not made of the same bones you had ten years ago?"},
+  {title:"Your skin is your largest organ",fact:"Skin covers about 20 square feet of area and weighs around 8 pounds. It replaces itself completely every 2-4 weeks. The dead skin cells you shed become a significant part of household dust.",wonder:"What does your skin protect you from right now that you are not thinking about?"},
+  {title:"Your gut has its own nervous system",fact:"The digestive system has over 100 million nerve cells — more than the spinal cord. Scientists call it the second brain. It communicates directly with your actual brain and can influence your mood.",wonder:"Have you ever felt something in your stomach before you knew what you were feeling emotionally?"},
+  {title:"Your eyes can detect a single photon of light",fact:"In complete darkness your eyes become so sensitive they can detect a single photon — the smallest possible unit of light. In daylight your pupils automatically shrink to protect you from that same light.",wonder:"Close your eyes for 30 seconds in a dim room then open them quickly. What do you notice?"},
+  {title:"Your brain uses 20 percent of your energy",fact:"Your brain is about 2 percent of your body weight but uses 20 percent of all the energy your body produces. It never fully turns off — working even when you sleep, consolidating memories and clearing waste.",wonder:"What is your brain doing right now that you are not aware of?"},
+  {title:"You have more bacteria than human cells",fact:"Your body contains more bacterial cells than human cells — about 38 trillion bacteria to 30 trillion human cells. Most of them live in your gut and are essential to your health.",wonder:"What does it mean that you are partly made of organisms that are not you?"},
+  {title:"Your muscles remember movement",fact:"When you practice a movement repeatedly your brain builds dedicated neural pathways for it — called muscle memory. This is why you do not have to think about how to walk or write your name.",wonder:"What is a movement your body knows so well you do not have to think about it?"},
+  {title:"Your ears never stop working",fact:"Unlike your eyes which you can close, your ears process sound 24 hours a day including while you sleep. The brain learns to filter most of it out, but certain sounds — your name, a baby crying — still break through.",wonder:"Sit completely still for 30 seconds and only listen. How many sounds can you count?"},
+  {title:"Your nose can detect a trillion smells",fact:"Scientists used to think humans could smell about 10,000 distinct scents. A 2014 study suggested the actual number is closer to one trillion. Smell is the sense most directly connected to memory.",wonder:"What is a smell that immediately takes you somewhere in your memory?"},
+  {title:"Goosebumps are a leftover from when we had fur",fact:"When you are cold or scared, tiny muscles at the base of each hair follicle contract, causing the hair to stand up. In our furry ancestors this made the fur fluff out for insulation or to look bigger to predators.",wonder:"What other things does your body do that used to have a purpose it no longer needs?"},
+  {title:"Your heartbeat syncs with music",fact:"Research shows that the heart rate of people listening to music together tends to synchronize. Slow music slows the heart. Fast music speeds it. Singing in a group causes heartbeats to align.",wonder:"What kind of music makes you feel it in your chest?"},
+  {title:"Sleep is when your brain cleans itself",fact:"During deep sleep your brain shrinks slightly, allowing cerebrospinal fluid to flush through and clear out waste products. Sleep is not rest. It is maintenance.",wonder:"What do you think is being cleaned out of your brain tonight while you sleep?"},
+  {title:"Your hands have more nerve endings than almost anywhere else",fact:"Your fingertips are among the most sensitive parts of your body — capable of detecting a surface texture difference of just 13 nanometers. That is smaller than a virus.",wonder:"Run your fingertip very slowly across a surface right now. What do you feel that you do not usually notice?"},
+  {title:"You breathe differently out of each nostril",fact:"Your nostrils take turns being the dominant one in a cycle that switches every 1-4 hours. The non-dominant nostril rests and reduces congestion. Most people have no idea this is happening.",wonder:"Close one nostril and breathe through the other. Then switch. Is there a difference?"},
+  {title:"Your bones are stronger than steel by weight",fact:"Pound for pound, bone is stronger than steel. A block of bone can bear 25,000 pounds of pressure per square inch. The human femur can support 30 times your body weight.",wonder:"If your bones are that strong, what kinds of forces break them?"},
+  {title:"You are taller in the morning",fact:"You are slightly taller in the morning than at night — by up to half an inch. During the day gravity compresses the cartilage between your vertebrae. While you sleep lying down it expands back.",wonder:"Why do you think the body is designed to recover its height overnight?"},
+  {title:"Your body has its own clock",fact:"Your body runs on a roughly 24-hour cycle called a circadian rhythm — driven by light detected in your eyes. It regulates sleep, hunger, hormones, body temperature, and dozens of other functions.",wonder:"What do you notice about your body at the same time every day?"},
+  {title:"Your body makes a new stomach lining every few days",fact:"The cells lining your stomach are replaced every 3-5 days because stomach acid — strong enough to dissolve metal — would otherwise digest the stomach itself. Your body is constantly regenerating.",wonder:"What else in your body do you think is being replaced right now without you knowing?"}
+];
+
+const EMBODIED = [
+  {prompt:"Walk across the room as if you are very heavy. Then walk back as if you are made of air.",sub:"Notice what changes in your breath, your spine, your feet."},
+  {prompt:"Stand completely still and find every place your body is touching something — floor, clothes, air.",sub:"How many points of contact can you count?"},
+  {prompt:"Breathe in for 4 counts, hold for 4, breathe out for 4. Do this three times.",sub:"Notice where in your body you feel the breath most."},
+  {prompt:"Walk very slowly from one end of the room to the other. Slow requires more strength than fast.",sub:"Which muscles have to work harder when you slow all the way down?"},
+  {prompt:"Stand on one foot with your eyes open. Then try with your eyes closed.",sub:"What does your body do to find balance when it cannot see?"},
+  {prompt:"Shake out your hands for 30 seconds. Then hold them completely still and notice what you feel.",sub:"What is the difference between movement and stillness?"},
+  {prompt:"Roll your shoulders backward 5 times. Then forward 5 times. Then hold them where they feel most natural.",sub:"Where do your shoulders actually want to be when nothing is pulling them?"},
+  {prompt:"Take five steps as if the floor is made of something unexpected — mud, water, hot sand, clouds.",sub:"Let your body respond to what you imagine rather than what is real."},
+  {prompt:"Put your hand on your belly and breathe until you can feel your hand move. Then put it on your chest.",sub:"Where does your breath go — into your chest or into your belly?"},
+  {prompt:"Move one arm as slowly as you possibly can from your side to above your head.",sub:"What muscles do you discover when you remove all momentum?"},
+  {prompt:"Walk heel to toe across the room in a straight line as if on a tightrope.",sub:"Where do you feel your balance living — in your feet, your core, your eyes?"},
+  {prompt:"Stand tall and imagine a string pulling the top of your head toward the ceiling. Let it lift you.",sub:"What changes in your posture when you imagine being pulled up instead of held up?"},
+  {prompt:"Tense every muscle in your body at once for 5 seconds. Then release everything completely.",sub:"Where does your body hold tension that you did not know about?"},
+  {prompt:"Walk in the largest circle you can make in the room. Now the smallest possible circle.",sub:"How does your body feel different moving in a tight circle versus a wide one?"},
+  {prompt:"Take three steps forward as if you are very confident. Then three steps as if you are uncertain.",sub:"What exactly does your body do differently? What changes?"},
+  {prompt:"Press your palms together as hard as you can for 10 seconds. Release and notice what you feel.",sub:"What happens in your hands and arms in the moment of release?"},
+  {prompt:"Stand with your feet apart and let your arms hang completely loose. Swing them gently like pendulums.",sub:"Let the movement happen rather than making it happen. What is the difference?"},
+  {prompt:"Make yourself as small as you can. Then as large as you can. Then find somewhere in between.",sub:"Where is your most natural size?"},
+  {prompt:"Walk backward from one room to another as slowly and carefully as you can.",sub:"What senses take over when you cannot see where you are going?"},
+  {prompt:"Put your ear against the wall and listen for 30 seconds.",sub:"What is the wall doing that you cannot hear from a distance?"},
+  {prompt:"Find the heaviest book in the room and carry it on your head for 30 seconds.",sub:"What does your whole body do to keep something balanced on top?"},
+  {prompt:"Stand in a doorframe and feel the difference between outside the frame and inside it.",sub:"Does your body feel different standing in a defined space versus an open one?"},
+  {prompt:"Tap your fingers one at a time on a surface — pinky to index. Then reverse. Then as fast as you can.",sub:"Which fingers are weaker? Which are most willing?"},
+  {prompt:"Walk around the room noticing only what is at floor level — the bottoms of things.",sub:"What do you see at floor height that you have never noticed before?"},
+  {prompt:"Sit on the floor with your legs crossed. Close your eyes and notice which direction you tend to lean.",sub:"Your body has a dominant side. What does yours prefer?"}
+];
+
+const MOVEMENT = [
+  {challenge:"Do 20 jumping jacks then hold a wall sit for 30 seconds. Rest and repeat.",littles:"Do 10 jumping jacks and sit against the wall for as long as you can."},
+  {challenge:"Bear crawl — hands and feet on the floor, knees off the ground — from one end of the room to the other and back.",littles:"Crawl like a baby bear from one side of the room to the other."},
+  {challenge:"Balance on one foot with your eyes closed. Time yourself on each side.",littles:"Stand on one foot and count to 10. Now try the other foot."},
+  {challenge:"Gallop like a horse around the house three times. Pay attention to how your feet alternate.",littles:"Gallop from one room to another making your best horse sound."},
+  {challenge:"Do 5 push-ups then 5 squats then 5 jumping jacks. Rest and repeat twice.",littles:"Do 3 wall push-ups and 5 small jumps. That is one round — do two rounds."},
+  {challenge:"Make up an 8-count movement sequence and teach it to at least one sibling. They must be able to repeat it.",littles:"Make up 4 movements and show them to someone. Can they copy you?"},
+  {challenge:"Do 15 lunges alternating legs. Keep your front knee over your ankle.",littles:"Take big slow steps forward bending your front knee each time. Do 8 steps."},
+  {challenge:"Crab walk — hands and feet on the floor belly facing up — from one side of the room to the other three times.",littles:"Crab walk across the room."},
+  {challenge:"Hold a plank for 30 seconds. Rest. Try for 45 seconds.",littles:"Hold a plank on your hands for as long as you can. Count with a sibling."},
+  {challenge:"Do 10 forward rolls if you have space. Focus on tucking your chin and rolling smoothly.",littles:"Roll sideways across a soft surface 3 times each direction."},
+  {challenge:"Walk on your tiptoes for 2 full minutes through every room. Notice which muscles are working.",littles:"Walk on your tiptoes from room to room as quietly as possible."},
+  {challenge:"Spin in place 10 times then immediately try to walk in a straight line.",littles:"Spin around 5 times then try to walk straight. What happens?"},
+  {challenge:"Do 20 mountain climbers — in a push-up position drive each knee toward your chest alternating quickly.",littles:"In a push-up position slowly bring one knee toward your chest then the other. Do 8 slow ones."},
+  {challenge:"Sit and stretch forward reaching for your toes. Hold 30 seconds. Then butterfly stretch, hold 30 seconds.",littles:"Sit and try to touch your toes. Hold for a slow count of 10."},
+  {challenge:"Do 3 sets: 8 squats, 8 push-ups, 8 jumping jacks. 20 seconds rest between sets.",littles:"Do 5 squats and 5 jumping jacks. Rest and do it one more time."},
+  {challenge:"Leap from spot to spot like you are crossing a river on stepping stones. Make 15 big deliberate leaps.",littles:"Jump from one square of floor to another pretending the ground between is water."},
+  {challenge:"March in place lifting your knees as high as you can for 60 full seconds.",littles:"March in place counting your steps out loud to 30. High knees!"},
+  {challenge:"Walk as slowly as humanly possible from one room to the next.",littles:"Walk in super slow motion from the door to the window. How slow can you go?"},
+  {challenge:"Find something outside and carry it a meaningful distance without using your hands.",littles:"Go outside, find a small rock, and carry it to a different spot using only your arms pressed together."},
+  {challenge:"Lie on your back and do 20 slow bicycle legs.",littles:"Lie on your back and pedal your legs in the air like a bicycle. Count to 15."}
+];
+
+const SKILLS = [
+  {name:"How to shake hands",steps:["Look the person in the eye","Extend your right hand with your thumb up","Grip firmly — not limp, not crushing","Shake twice and let go","Say your name or theirs"]},
+  {name:"How to write a thank-you note",steps:["Start with the person's name","Say thank you for the specific thing","Say one thing it meant to you","Close with warmth — sincerely, with love, yours","Write the date on it"]},
+  {name:"How to read a recipe",steps:["Read the whole recipe before you start","Check that you have all ingredients","Understand what every step means before doing it","Prep everything before you cook","Clean as you go"]},
+  {name:"How to make a bed",steps:["Pull the fitted sheet tight at all four corners","Lay the flat sheet evenly on both sides","Fold the top of the sheet down over the blanket","Fluff and center the pillow","Smooth everything from the center outward"]},
+  {name:"How to apologize",steps:["Say what you did — specifically","Say you are sorry without adding but","Ask what you can do to make it right","Give them time to respond","Follow through on what you said"]},
+  {name:"How to use a compass",steps:["Hold it flat and steady","Let the needle settle — it always points north","Turn the compass until N aligns with the needle","Find your direction on the outer ring","Walk and check it periodically"]},
+  {name:"How to fold a letter for an envelope",steps:["Lay the letter flat and fold the bottom third up","Fold the top third down over it","Crease firmly with your thumbnail","Slide it into the envelope bottom first","Seal from the center outward"]},
+  {name:"How to tie a square knot",steps:["Cross the right end over the left and pull through","Cross the left end over the right and pull through","Pull both ends firmly","A square knot lies flat — if it twists it is a granny knot","Use it to join two ropes of the same thickness"]},
+  {name:"How to read a map",steps:["Find north first — usually at the top","Find where you are on the map","Find where you want to go","Trace the route noting major landmarks","Keep the map oriented to north as you travel"]},
+  {name:"How to season cast iron",steps:["Wash the pan with soap and dry it completely","Rub a very thin layer of oil over every surface","Place it upside down in a 450 degree oven","Bake for one hour then turn the oven off","Let it cool completely in the oven"]},
+  {name:"How to write a check",steps:["Date it in the top right","Write the person or company's name on Pay to the Order of","Write the amount in numbers in the box","Write the amount in words on the line below","Sign your full name on the bottom right"]},
+  {name:"How to take a good photograph",steps:["Get close to your subject","Find natural light — face toward it not away","Hold the camera or phone steady","Wait for the right moment before pressing","Look at the background — what is in it?"]},
+  {name:"How to read a food label",steps:["Start with serving size — everything else is based on it","Look at calories per serving","Check sodium — most people eat too much","Look at the ingredient list — shortest is usually best","Ingredients are listed from most to least by weight"]},
+  {name:"How to introduce people",steps:["Say the name of the more honored person first","Then introduce the other person to them","Include a connecting detail — they both love dogs","Make eye contact with both people as you speak","Step back and let them talk"]},
+  {name:"How to start a fire safely",steps:["Clear a 10-foot area from anything flammable","Build a tinder nest of dry grass or paper","Create a small tepee of thin sticks over it","Light the tinder from the base with a match","Add larger sticks slowly once the small ones catch"]},
+  {name:"How to do laundry",steps:["Sort into lights, darks, and delicates","Check every label for washing instructions","Use the right amount of detergent — less than you think","Match water temperature to the load","Transfer to dryer promptly and fold while warm"]},
+  {name:"How to listen well",steps:["Put away anything in your hands","Face the person and make eye contact","Do not plan your response while they speak","Wait until they finish before you talk","Ask one question about what they said"]},
+  {name:"How to plant a seed",steps:["Fill a container with good soil almost to the top","Make a hole as deep as the seed is wide — check the packet","Place one or two seeds in the hole","Cover gently and press lightly","Water until the soil is damp but not soaked"]},
+  {name:"How to give a compliment",steps:["Make it specific — not nice job but I liked how you kept going","Direct it to the person, not the room","Do not add but at the end","Look at them when you say it","You do not need a reason — kindness is enough"]},
+  {name:"How to ask for help",steps:["Be specific about what you need","Ask one person at a time","Give them time to say yes or no","Say thank you when they help","Offer to help them with something in return"]},
+  {name:"How to budget a small amount of money",steps:["Count what you have","List what you need and what you want","Pay for needs first","Decide ahead how much to save — even a little","Do not spend what is not there"]},
+  {name:"How to darn a sock",steps:["Thread a needle with matching yarn or thread","Stretch the sock over a round object like a jar","Weave the thread back and forth across the hole","Then weave perpendicular threads over and under","Knot the thread on the inside when finished"]},
+  {name:"How to read a thermometer",steps:["Hold it at eye level","Find the line of liquid and where it stops","Read the number at the top of the liquid","On a weather thermometer wait 2-3 minutes outside","Body temperature is normal at 98.6 degrees Fahrenheit"]},
+  {name:"How to read a clock face",steps:["The short hand points to the hour","The long hand points to the minutes — each mark is 5 minutes","The thin fast hand counts seconds","When the long hand is at 12 it is exactly the hour","Halfway around is 30 minutes past"]},
+  {name:"How to sharpen a pencil with a knife",steps:["Hold the pencil firmly pointing away from you","Place the knife blade at a low angle to the wood","Push away from you in short controlled strokes","Rotate the pencil and repeat until the wood tapers","Finish the graphite tip gently"]}
+];
+
+function dayOfYear() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  return Math.floor((now - start) / (1000 * 60 * 60 * 24));
+}
+function dayIndex(arr) { return arr[dayOfYear() % arr.length]; }
+
+function getPerson() {
+  const month = new Date().getMonth();
+  const themeOrder = [4,5,6,7,8,9,10,11,0,1,2,3];
+  const themeIndex = themeOrder[month];
+  const people = PEOPLE_BY_MONTH[themeIndex];
+  const dayInMonth = new Date().getDate() - 1;
+  return people[dayInMonth % people.length];
+}
+
+function getThemeName() {
+  const themes = [
+    "Makers and Builders","Explorers and Naturalists","People of Courage","Artists and Poets",
+    "Scientists and Inventors","People of Faith and Justice","Women Who Changed Things",
+    "Farmers and Land Keepers","Storytellers and Writers","Musicians and Dancers",
+    "Adventurers and Athletes","Thinkers and Philosophers"
+  ];
+  const themeOrder = [4,5,6,7,8,9,10,11,0,1,2,3];
+  return themes[themeOrder[new Date().getMonth()]];
+}
+
+function fetchWithTimeout(url, ms = 5000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  return fetch(url, { signal: controller.signal })
+    .then(r => r.json())
+    .finally(() => clearTimeout(timer));
+}
+
+function render({ wordData }) {
+  const wordObj = dayIndex(WORDS);
+  const sight = dayIndex(SIGHT_WORDS);
+  const person = getPerson();
+  const poem = dayIndex(POEMS);
+  const nature = dayIndex(NATURE);
+  const body = dayIndex(BODY_FACTS);
+  const embodied = dayIndex(EMBODIED);
+  const movement = dayIndex(MOVEMENT);
+  const skill = dayIndex(SKILLS);
+
+  let wordCard = '';
+  const langRow = `
+    <div class="lang-row">
+      <span class="lang-pill lang-es">ES: ${wordObj.spanish}</span>
+      <span class="lang-pill lang-fr">FR: ${wordObj.french}</span>
+      <span class="lang-pill lang-asl">ASL</span>
+    </div>
+    <div class="asl-note">${wordObj.asl}</div>
+    <a class="asl-link" href="https://www.lifeprint.com" target="_blank">Look it up on Lifeprint.com</a>
+  `;
+  if (wordData && wordData.length) {
+    const entry = wordData[0];
+    const meaning = entry.meanings?.[0];
+    const def = meaning?.definitions?.[0];
+    const pos = meaning?.partOfSpeech || '';
+    const definition = def?.definition || '';
+    const example = def?.example || '';
+    wordCard = `<div class="card">
+      <div class="clabel">Word of the Day <div class="clabel-line"></div></div>
+      <div class="cheadline">${wordObj.word}</div>
+      <div class="csub">${pos}</div>
+      <div class="cbody">${definition}</div>
+      ${example ? `<hr class="divider"><div class="cbody" style="font-style:italic;"><span style="color:var(--ink-light);">Example: </span>${example}</div>` : ''}
+      ${langRow}
+      <div class="tier tier-littles"><span class="tier-label">Littles</span>${wordObj.tip}</div>
     </div>`;
-  }).join('');
-  el.querySelectorAll('input').forEach(inp=>{
-    inp.addEventListener('change', ()=>{
-      const saved = JSON.parse(localStorage.getItem(todayKey()) || '{}');
-      saved[inp.dataset.idx] = inp.checked;
-      localStorage.setItem(todayKey(), JSON.stringify(saved));
-      inp.nextElementSibling.classList.toggle('done', inp.checked);
-    });
-  });
-}
-
-// ============ WEEKLY NOTE ============
-function weekNoteKey(){
-  const d = new Date();
-  const onejan = new Date(d.getFullYear(),0,1);
-  const weekNum = Math.ceil((((d - onejan) / 86400000) + onejan.getDay()+1)/7);
-  return 'hs_weeklynote_' + d.getFullYear() + '_' + weekNum;
-}
-function renderWeeklyNote(){
-  const ta = document.getElementById('weeklyNote');
-  ta.value = localStorage.getItem(weekNoteKey()) || '';
-  ta.addEventListener('input', ()=> localStorage.setItem(weekNoteKey(), ta.value));
-}
-
-// ============ PORTFOLIO ============
-function renderPortfolio(){
-  const key = 'hs_portfolio_' + new Date().toISOString().slice(0,10);
-  const saved = JSON.parse(localStorage.getItem(key) || '{}');
-  const el = document.getElementById('portfolioInputs');
-  el.innerHTML = KIDS.map(k=>`
-    <div style="margin-bottom:10px;">
-      <label class="muted" style="display:block;margin-bottom:4px;">${k}</label>
-      <input type="text" data-kid="${k}" value="${(saved[k]||'').replace(/"/g,'&quot;')}" placeholder="What to file...">
-    </div>`).join('');
-  el.querySelectorAll('input').forEach(inp=>{
-    inp.addEventListener('input', ()=>{
-      const saved = JSON.parse(localStorage.getItem(key) || '{}');
-      saved[inp.dataset.kid] = inp.value;
-      localStorage.setItem(key, JSON.stringify(saved));
-    });
-  });
-}
-
-// ============ MONTHLY SNAPSHOT ============
-function renderSnapshot(){
-  const key = 'hs_snapshot';
-  const saved = JSON.parse(localStorage.getItem(key) || '{}');
-  const rows = ["Wk 1","Wk 2","Wk 3","Wk 4"];
-  const cols = ["readaloud","history","science","notes"];
-  const body = document.getElementById('snapshotBody');
-  body.innerHTML = rows.map((r,ri)=>{
-    const cells = cols.map(c=>{
-      const val = (saved[ri] && saved[ri][c]) ? saved[ri][c] : '';
-      return `<td contenteditable="true" data-row="${ri}" data-col="${c}">${val}</td>`;
-    }).join('');
-    return `<tr><td>${r}</td>${cells}</tr>`;
-  }).join('');
-  body.querySelectorAll('td[contenteditable]').forEach(td=>{
-    td.addEventListener('blur', ()=>{
-      const saved = JSON.parse(localStorage.getItem(key) || '{}');
-      const ri = td.dataset.row;
-      saved[ri] = saved[ri] || {};
-      saved[ri][td.dataset.col] = td.textContent;
-      localStorage.setItem(key, JSON.stringify(saved));
-    });
-  });
-}
-
-// ============ RESET ============
-document.getElementById('resetAll').addEventListener('click', ()=>{
-  if(confirm('Clear all saved tracking (checklists, notes, snapshot, portfolio) on this device? This cannot be undone.')){
-    Object.keys(localStorage).filter(k=>k.startsWith('hs_')).forEach(k=>localStorage.removeItem(k));
-    renderChecks(); renderWeeklyNote(); renderPortfolio(); renderSnapshot(); renderToday();
-    document.getElementById('setCurrentWeek').checked = false;
-  }
-});
-
-// ============ REPORT ============
-function buildReport(){
-  const today = new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
-  let html = `<p class="muted">Generated ${today}</p>`;
-
-  // Curriculum themes covered
-  html += '<h3>Curriculum Covered</h3><ul class="plain">';
-  WEEKS.forEach(w=>{
-    const adj = localStorage.getItem('hs_weekadjust_' + (w.week-1));
-    html += `<li><strong>Week ${w.week} (${w.range})</strong> — History: ${w.theme.history}. Science: ${w.theme.science}.`;
-    if(adj) html += `<br><span class="tag">Adjustment noted: ${escapeHtml(adj)}</span>`;
-    html += `</li>`;
-  });
-  html += '</ul>';
-
-  // Weekly look-back notes
-  const weekNoteKeys = Object.keys(localStorage).filter(k=>k.startsWith('hs_weeklynote_')).sort();
-  html += '<h3>Weekly Look-Back Notes</h3>';
-  if(weekNoteKeys.length === 0){
-    html += '<p class="muted">None logged yet.</p>';
   } else {
-    html += '<ul class="plain">';
-    weekNoteKeys.forEach(k=>{
-      const val = localStorage.getItem(k);
-      if(val && val.trim()){
-        const label = k.replace('hs_weeklynote_','').replace('_',' — Week ');
-        html += `<li><strong>${label}</strong>: ${escapeHtml(val)}</li>`;
-      }
-    });
-    html += '</ul>';
+    wordCard = `<div class="card">
+      <div class="clabel">Word of the Day <div class="clabel-line"></div></div>
+      <div class="cheadline">${wordObj.word}</div>
+      <div class="cbody" style="font-style:italic;color:var(--ink-light);">Look this word up in the dictionary today.</div>
+      ${langRow}
+      <div class="tier tier-littles"><span class="tier-label">Littles</span>${wordObj.tip}</div>
+    </div>`;
   }
 
-  // Monthly snapshot
-  html += '<h3>Monthly Snapshot</h3>';
-  const snap = JSON.parse(localStorage.getItem('hs_snapshot') || '{}');
-  const rowLabels = ["Week 1","Week 2","Week 3","Week 4"];
-  if(Object.keys(snap).length === 0){
-    html += '<p class="muted">Not filled in yet.</p>';
-  } else {
-    html += '<table class="snapshot"><thead><tr><th>Week</th><th>Read-aloud</th><th>History</th><th>Science</th><th>Notes</th></tr></thead><tbody>';
-    rowLabels.forEach((r,ri)=>{
-      const row = snap[ri] || {};
-      html += `<tr><td>${r}</td><td>${escapeHtml(row.readaloud||'')}</td><td>${escapeHtml(row.history||'')}</td><td>${escapeHtml(row.science||'')}</td><td>${escapeHtml(row.notes||'')}</td></tr>`;
-    });
-    html += '</tbody></table>';
-  }
+  document.getElementById('main-content').innerHTML = `
+    <div class="section-header"><span class="section-title">To Begin</span><div class="section-rule"></div></div>
+    <div class="anchor-grid">
+      <div class="anchor-card">
+        <span class="anchor-label">Gratitude</span>
+        <div class="anchor-prompt">Name one specific thing you are grateful for this morning.</div>
+        <div class="anchor-sub">Real and specific. Say it aloud.</div>
+      </div>
+      <div class="anchor-card">
+        <span class="anchor-label">Observation</span>
+        <div class="anchor-prompt">Go outside two minutes. Come back with one thing you noticed.</div>
+        <div class="anchor-sub">Any weather. Just go and look.</div>
+      </div>
+      <div class="anchor-card">
+        <span class="anchor-label">Intention</span>
+        <div class="anchor-prompt">Today I will work hard at ___ and I will be kind to ___.</div>
+        <div class="anchor-sub">Say it or write it before the day begins.</div>
+      </div>
+    </div>
 
-  // Portfolio entries
-  const portfolioKeys = Object.keys(localStorage).filter(k=>k.startsWith('hs_portfolio_')).sort();
-  html += '<h3>Portfolio Pieces Filed</h3>';
-  if(portfolioKeys.length === 0){
-    html += '<p class="muted">None logged yet.</p>';
-  } else {
-    html += '<ul class="plain">';
-    portfolioKeys.forEach(k=>{
-      const date = k.replace('hs_portfolio_','');
-      const entries = JSON.parse(localStorage.getItem(k) || '{}');
-      const parts = Object.entries(entries).filter(([kid,val])=>val && val.trim()).map(([kid,val])=>`${kid}: ${escapeHtml(val)}`);
-      if(parts.length){
-        html += `<li><strong>${date}</strong> — ${parts.join(' · ')}</li>`;
-      }
-    });
-    html += '</ul>';
-  }
+    <div class="section-header" style="margin-top:16px;"><span class="section-title">Language</span><div class="section-rule"></div></div>
+    <div class="grid">
+      ${wordCard}
+      <div class="card">
+        <div class="clabel">Sight Word <div class="clabel-line"></div></div>
+        <div class="sight-word-display">${sight.word}</div>
+        <div class="sight-sentence">${sight.sentence}</div>
+        <div class="tier tier-littles"><span class="tier-label">Say it, spell it, find it</span>Find this word on something nearby — a book, a label, a sign.</div>
+      </div>
+    </div>
 
-  return html;
+    <div class="section-header" style="margin-top:16px;"><span class="section-title">The World</span><div class="section-rule"></div></div>
+    <div class="grid">
+      <div class="card world-bg">
+        <div class="clabel">Person of the Day <div class="clabel-line"></div></div>
+        <span class="person-theme">${getThemeName()}</span>
+        <div class="person-name">${person.name}</div>
+        <div class="person-dates">${person.dates}</div>
+        <div class="cbody">${person.desc}</div>
+        <div class="talk-about"><strong>Talk about it</strong>${person.talk}</div>
+      </div>
+      <div class="card world-bg full">
+        <div class="clabel">Poem of the Day — read aloud <div class="clabel-line"></div></div>
+        <div class="poem-title">${poem.title}</div>
+        <div class="poem-author">${poem.author}</div>
+        <div class="poem-text">${poem.lines.map(l => `${l}<br>`).join('')}</div>
+        <div class="poem-question">? ${poem.question}</div>
+      </div>
+    </div>
+
+    <div class="section-header" style="margin-top:16px;"><span class="section-title">Body and Science</span><div class="section-rule"></div></div>
+    <div class="grid">
+      <div class="card">
+        <div class="clabel">Nature Fact <div class="clabel-line"></div></div>
+        <div class="cheadline" style="font-size:18px;margin-bottom:8px;">${nature.title}</div>
+        <div class="cbody">${nature.fact}</div>
+        <div class="tier tier-littles"><span class="tier-label">Littles</span>${nature.littles}</div>
+        <div class="wonder">? ${nature.wonder}</div>
+      </div>
+      <div class="card body-bg">
+        <div class="clabel">Body Fact <div class="clabel-line"></div></div>
+        <div class="body-headline">${body.title}</div>
+        <div class="cbody">${body.fact}</div>
+        <div class="wonder">? ${body.wonder}</div>
+      </div>
+      <div class="card body-bg full">
+        <div class="clabel">Embodied Movement <div class="clabel-line"></div></div>
+        <div class="movement-prompt">${embodied.prompt}</div>
+        <div class="movement-sub">${embodied.sub}</div>
+      </div>
+    </div>
+
+    <div class="section-header" style="margin-top:16px;"><span class="section-title">Move</span><div class="section-rule"></div></div>
+    <div class="grid">
+      <div class="card full">
+        <div class="clabel">Movement Challenge <div class="clabel-line"></div></div>
+        <div class="challenge-text">${movement.challenge}</div>
+        <div class="tier tier-littles"><span class="tier-label">Littles</span>${movement.littles}</div>
+      </div>
+    </div>
+
+    <div class="section-header" style="margin-top:16px;"><span class="section-title">Skill of the Day</span><div class="section-rule"></div></div>
+    <div class="grid">
+      <div class="card full">
+        <div class="clabel">Learn it today <div class="clabel-line"></div></div>
+        <div class="skill-name">${skill.name}</div>
+        <ul class="skill-steps">
+          ${skill.steps.map((s,i) => `<li data-n="${i+1}">${s}</li>`).join('')}
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer"><p class="footer-note">Content rotates daily</p></div>
+  `;
+
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('page').style.display = 'block';
 }
-function escapeHtml(s){
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
-}
-document.getElementById('genReport').addEventListener('click', ()=>{
-  document.getElementById('reportContent').innerHTML = buildReport();
-  document.getElementById('reportOverlay').style.display = 'block';
-});
-document.getElementById('closeReport').addEventListener('click', ()=>{
-  document.getElementById('reportOverlay').style.display = 'none';
-});
-document.getElementById('printReport').addEventListener('click', ()=>{
-  const w = window.open('', '_blank');
-  w.document.write('<html><head><title>Homeschool Progress Report</title><style>body{font-family:Georgia,serif;padding:30px;color:#222;} table{border-collapse:collapse;width:100%;} td,th{border:1px solid #ccc;padding:6px 8px;text-align:left;} h3{margin-top:24px;}</style></head><body>' + document.getElementById('reportContent').innerHTML + '</body></html>');
-  w.document.close();
-  w.print();
-});
-document.getElementById('copyReport').addEventListener('click', ()=>{
-  const text = document.getElementById('reportContent').innerText;
-  navigator.clipboard.writeText(text).then(()=>{
-    const btn = document.getElementById('copyReport');
-    const orig = btn.textContent;
-    btn.textContent = 'Copied!';
-    setTimeout(()=> btn.textContent = orig, 1500);
+
+async function init() {
+  document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-US', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
   });
-});
+  const wordObj = dayIndex(WORDS);
+  const [wordRes] = await Promise.allSettled([
+    fetchWithTimeout(`https://api.dictionaryapi.dev/api/v2/entries/en/${wordObj.word}`)
+  ]);
+  render({ wordData: wordRes.status === 'fulfilled' ? wordRes.value : null });
+}
 
-// ============ INIT ============
-renderWeek();
-bindWeekAdjustNote();
-renderToday();
-renderChecks();
-renderWeeklyNote();
-renderPortfolio();
-renderSnapshot();
+init();
 </script>
 </body>
 </html>
