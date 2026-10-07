@@ -198,6 +198,21 @@
   }
   .reset-link{font-size:12px;color:var(--ink-faint);text-decoration:underline;cursor:pointer;background:none;border:none;font-family:inherit;padding:0;}
 
+  .list-item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-top:1px solid var(--line);}
+  .list-item:first-child{border-top:none;}
+  .list-item input{margin-top:4px;accent-color:var(--wine);width:17px;height:17px;}
+  .list-item .txt{flex:1;cursor:pointer;}
+  .list-item .txt.done{color:var(--ink-faint);text-decoration:line-through;}
+  .list-item .rm{background:none;border:none;color:var(--ink-faint);font-size:18px;cursor:pointer;padding:0 4px;line-height:1;}
+  .list-item .rm:hover{color:var(--wine-soft);}
+  .opt-chip{background:var(--bg-card-raised);border:1px solid var(--line);color:var(--ink-dim);font-family:inherit;font-size:13px;padding:5px 11px;border-radius:var(--radius);cursor:pointer;margin:0 6px 6px 0;}
+  .opt-chip:hover{border-color:var(--gold);color:var(--ink);}
+  .opt-chip.used{opacity:0.35;cursor:default;border-style:dashed;}
+  .add-row{display:flex;gap:8px;margin-top:10px;}
+  .add-row button{background:var(--wine);border:none;color:var(--ink);padding:0 18px;border-radius:var(--radius);cursor:pointer;font-family:inherit;font-size:15px;}
+  .prog{font-size:13px;color:var(--gold);letter-spacing:.06em;text-transform:uppercase;}
+  .small-btn{background:none;border:1px solid var(--line);color:var(--ink-dim);padding:6px 14px;border-radius:var(--radius);cursor:pointer;font-family:inherit;font-size:13px;}
+  .small-btn:hover{border-color:var(--gold);color:var(--ink);}
   footer{text-align:center;padding:30px 24px 50px;color:var(--ink-faint);font-size:13px;}
 </style>
 </head>
@@ -211,6 +226,7 @@
 
 <nav class="tabs">
   <button data-view="today" class="active">Today</button>
+  <button data-view="lists">Daily Lists</button>
   <button data-view="week">This Week</button>
   <button data-view="individual">Individual Work</button>
   <button data-view="connection">Connection Time</button>
@@ -276,6 +292,26 @@
       <textarea id="weekAdjustNote" rows="3" placeholder="e.g. moved Wed's science to Thursday since we did the nature walk Tuesday instead..."></textarea>
       <div class="save-note">Saved automatically on this device, tied to this specific week.</div>
     </div>
+  </section>
+
+  <!-- DAILY LISTS -->
+  <section id="lists" class="view">
+    <div class="card">
+      <div class="week-nav">
+        <button id="listPrev">&larr; Prev day</button>
+        <div class="week-title">
+          <span class="eyebrow">Daily Lists</span>
+          <span class="range" id="listDateLabel"></span>
+        </div>
+        <button id="listNext">Next day &rarr;</button>
+      </div>
+      <p class="muted" style="text-align:center;">Tap an option to add it to a kid's list, or type your own. Check things off as they get done.</p>
+      <div style="text-align:center;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+        <button class="small-btn" id="listToday">Jump to today</button>
+        <button class="small-btn" id="listCarry">Carry over unfinished from the day before</button>
+      </div>
+    </div>
+    <div id="kidLists"></div>
   </section>
 
   <!-- INDIVIDUAL WORK -->
@@ -934,6 +970,23 @@ function buildReport(){
     html += '</tbody></table>';
   }
 
+  // Daily lists completed
+  const listKeys = Object.keys(localStorage).filter(k=>k.startsWith('hs_lists_')).sort();
+  html += '<h3>Daily Work Completed</h3>';
+  let anyDone = false;
+  let listHtml = '<ul class="plain">';
+  listKeys.forEach(k=>{
+    const date = k.replace('hs_lists_','');
+    const data = JSON.parse(localStorage.getItem(k) || '{}');
+    const parts = Object.keys(data).map(kid=>{
+      const done = (data[kid]||[]).filter(i=>i.d).map(i=>escapeHtml(i.t));
+      return done.length ? kid+': '+done.join(', ') : '';
+    }).filter(Boolean);
+    if(parts.length){ anyDone = true; listHtml += '<li><strong>'+date+'</strong><br>'+parts.join('<br>')+'</li>'; }
+  });
+  listHtml += '</ul>';
+  html += anyDone ? listHtml : '<p class="muted">None logged yet.</p>';
+
   // Portfolio entries
   const portfolioKeys = Object.keys(localStorage).filter(k=>k.startsWith('hs_portfolio_')).sort();
   html += '<h3>Portfolio Pieces Filed</h3>';
@@ -982,8 +1035,105 @@ document.getElementById('copyReport').addEventListener('click', ()=>{
   });
 });
 
+// ============ DAILY LISTS ============
+const LIST_KIDS = [
+  {id:"5yo", cls:"rose", opts:["Write letters","Write numbers","Count out loud","Khan Academy Kids","Starfall","Progressive Phonics","RightStart Math","Read the pictures","Tracing page"]},
+  {id:"8yo", cls:"gold", opts:["Read 15-20 min","Progressive Phonics","RightStart Math","Prodigy Math","Handwriting","Write 2-3 sentences","Starfall","History","Science"]},
+  {id:"10yo", cls:"", opts:["Typing","Math","History","Science","Read 20 min","Prodigy Math","Math facts","Journal entry","Duolingo"]},
+  {id:"12yo", cls:"wine", opts:["Khan Grammar","Reading","Copywork","Teaching Textbooks","Prodigy Math","Division drills","Freewrite","Callirobics","Spelling","History","Science"]}
+];
+let listDate = new Date();
+function localKey(d){
+  const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+day;
+}
+function listStoreKey(d){ return 'hs_lists_' + localKey(d); }
+function loadLists(d){ try{ return JSON.parse(localStorage.getItem(listStoreKey(d)) || '{}'); }catch(e){ return {}; } }
+function saveLists(d, data){ localStorage.setItem(listStoreKey(d), JSON.stringify(data)); }
+
+function renderKidList(kid){
+  const data = loadLists(listDate);
+  const items = data[kid.id] || [];
+  const done = items.filter(i=>i.d).length;
+  const el = document.getElementById('kidlist_'+kid.id);
+  const usedText = items.map(i=>i.t.toLowerCase());
+  const chips = kid.opts.map(o=>{
+    const used = usedText.includes(o.toLowerCase());
+    return '<button class="opt-chip'+(used?' used':'')+'" data-opt="'+escapeHtml(o)+'"'+(used?' disabled':'')+'>+ '+escapeHtml(o)+'</button>';
+  }).join('');
+  const rows = items.length ? items.map((it,idx)=>
+    '<div class="list-item"><input type="checkbox" data-idx="'+idx+'" id="li_'+kid.id+'_'+idx+'"'+(it.d?' checked':'')+'>'+
+    '<label class="txt'+(it.d?' done':'')+'" for="li_'+kid.id+'_'+idx+'">'+escapeHtml(it.t)+'</label>'+
+    '<button class="rm" data-rm="'+idx+'" title="Remove">&times;</button></div>'
+  ).join('') : '<p class="muted">Nothing on the list yet.</p>';
+  el.innerHTML =
+    '<div style="display:flex;justify-content:space-between;align-items:baseline;">'+
+      '<h2><span class="kid-tag '+kid.cls+'">'+kid.id+'</span></h2>'+
+      '<span class="prog">'+done+' of '+items.length+' done</span></div>'+
+    '<div>'+rows+'</div>'+
+    '<div style="margin-top:14px;"><div class="muted" style="font-size:13px;margin-bottom:6px;">Quick add:</div>'+chips+'</div>'+
+    '<div class="add-row"><input type="text" placeholder="Type something to add..." data-input="'+kid.id+'"><button data-addbtn="'+kid.id+'">Add</button></div>';
+
+  el.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      const d = loadLists(listDate);
+      d[kid.id][parseInt(cb.dataset.idx,10)].d = cb.checked;
+      saveLists(listDate, d);
+      renderKidList(kid);
+    });
+  });
+  el.querySelectorAll('[data-rm]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const d = loadLists(listDate);
+      d[kid.id].splice(parseInt(b.dataset.rm,10),1);
+      saveLists(listDate, d);
+      renderKidList(kid);
+    });
+  });
+  el.querySelectorAll('.opt-chip:not(.used)').forEach(b=>{
+    b.addEventListener('click', ()=>{ addListItem(kid, b.dataset.opt); });
+  });
+  const input = el.querySelector('[data-input]');
+  const addNow = ()=>{ const v = input.value.trim(); if(v){ addListItem(kid, v, true); } };
+  el.querySelector('[data-addbtn]').addEventListener('click', addNow);
+  input.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); addNow(); } });
+}
+function addListItem(kid, text, refocus){
+  const d = loadLists(listDate);
+  d[kid.id] = d[kid.id] || [];
+  d[kid.id].push({t:text, d:false});
+  saveLists(listDate, d);
+  renderKidList(kid);
+  if(refocus){ const i = document.querySelector('#kidlist_'+kid.id+' [data-input]'); if(i) i.focus(); }
+}
+function renderLists(){
+  document.getElementById('listDateLabel').textContent =
+    listDate.toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric'});
+  const wrap = document.getElementById('kidLists');
+  wrap.innerHTML = LIST_KIDS.map(k=>'<div class="card" id="kidlist_'+k.id+'"></div>').join('');
+  LIST_KIDS.forEach(renderKidList);
+}
+document.getElementById('listPrev').addEventListener('click', ()=>{ listDate = new Date(listDate.getFullYear(), listDate.getMonth(), listDate.getDate()-1); renderLists(); });
+document.getElementById('listNext').addEventListener('click', ()=>{ listDate = new Date(listDate.getFullYear(), listDate.getMonth(), listDate.getDate()+1); renderLists(); });
+document.getElementById('listToday').addEventListener('click', ()=>{ listDate = new Date(); renderLists(); });
+document.getElementById('listCarry').addEventListener('click', ()=>{
+  const prev = new Date(listDate.getFullYear(), listDate.getMonth(), listDate.getDate()-1);
+  const prevData = loadLists(prev);
+  const cur = loadLists(listDate);
+  LIST_KIDS.forEach(k=>{
+    const existing = (cur[k.id]||[]).map(i=>i.t.toLowerCase());
+    (prevData[k.id]||[]).filter(i=>!i.d && !existing.includes(i.t.toLowerCase())).forEach(i=>{
+      cur[k.id] = cur[k.id] || [];
+      cur[k.id].push({t:i.t, d:false});
+    });
+  });
+  saveLists(listDate, cur);
+  renderLists();
+});
+
 // ============ INIT ============
 renderWeek();
+renderLists();
 bindWeekAdjustNote();
 renderToday();
 renderChecks();
