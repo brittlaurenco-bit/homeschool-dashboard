@@ -140,6 +140,38 @@
   }
   .link-chip:hover{border-color:var(--gold);color:var(--ink);}
 
+
+  .week-jump{display:flex;gap:10px;justify-content:center;margin:0 0 10px;flex-wrap:wrap;}
+  .week-jump select,.word-form input{
+    background:var(--bg-card-raised);color:var(--ink);border:1px solid var(--line);
+    border-radius:var(--radius);padding:8px 10px;font-family:inherit;font-size:15px;
+  }
+  .week-jump button,.small-btn{
+    background:none;border:1px solid var(--line);color:var(--ink-dim);border-radius:var(--radius);
+    padding:8px 14px;font-family:inherit;font-size:14px;cursor:pointer;
+  }
+  .week-jump button:hover,.small-btn:hover{border-color:var(--gold);color:var(--ink);}
+  .spell-box{background:var(--bg-card-raised);border-left:3px solid var(--sage);padding:10px 14px;margin:12px 0;border-radius:4px;}
+  .gap-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin:12px 0;}
+  .gap-item{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:var(--radius);
+    padding:8px 10px;cursor:pointer;background:var(--bg-card-raised);font-size:15px;}
+  .gap-item input{accent-color:var(--wine);}
+  .gap-item small{color:var(--ink-faint);margin-left:auto;}
+  .sp-sched{display:grid;grid-template-columns:120px 1fr;gap:6px 14px;padding:8px 0;border-top:1px solid var(--line);}
+  .sp-sched:first-child{border-top:none;}
+  details.sp-group{border-top:1px solid var(--line);padding:8px 0;}
+  details.sp-group>summary{cursor:pointer;color:var(--gold);font-size:17px;font-weight:600;}
+  details.sp-rule{margin:8px 0 8px 12px;}
+  details.sp-rule>summary{cursor:pointer;color:var(--ink);}
+  .sp-body{padding:6px 0 6px 6px;font-size:15px;}
+  .sp-body p{margin:4px 0;}
+  .word-form{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;margin:12px 0;}
+  .wl-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;padding:6px 0;border-top:1px solid var(--line);font-size:15px;}
+  @media (max-width:600px){
+    .word-form,.wl-row{grid-template-columns:1fr 1fr;}
+    .sp-sched{grid-template-columns:1fr;}
+  }
+
   .week-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
   .week-nav button{
     background:none;border:1px solid var(--line);color:var(--ink-dim);
@@ -229,6 +261,7 @@
   <button data-view="lists">Daily Lists</button>
   <button data-view="week">This Week</button>
   <button data-view="individual">Individual Work</button>
+  <button data-view="spelling">Spelling</button>
   <button data-view="connection">Connection Time</button>
   <button data-view="lightday">Light Day</button>
   <button data-view="track">Track It</button>
@@ -276,9 +309,10 @@
         </div>
         <button id="nextWeek">Next &rarr;</button>
       </div>
-      <p class="muted" style="text-align:center;">
-        <label style="cursor:pointer;"><input type="checkbox" id="setCurrentWeek" style="accent-color:var(--wine);"> Mark this the current week (shows on the Today tab)</label>
-      </p>
+      <div class="week-jump">
+        <select id="weekJump" aria-label="Jump to a week"></select>
+        <button id="goCurrentWeek">Go to this week</button>
+      </div>
       <div class="sprig">
         <svg viewBox="0 0 400 22" preserveAspectRatio="none"><path d="M0,11 C60,2 100,20 160,11 S260,2 400,11"/><circle cx="60" cy="6" r="2.4"/><circle cx="220" cy="14" r="2.2"/><circle cx="340" cy="6" r="2"/></svg>
       </div>
@@ -412,6 +446,52 @@
         <li><span class="kid-tag">10yo</span>Mismatch rounds — act one emotion, show a different one on your face, guess which is real</li>
         <li><span class="kid-tag wine">12yo</span>Discuss context clues beyond the face — posture, tone, what's not being said</li>
       </ul>
+    </div>
+  </section>
+
+  <!-- SPELLING -->
+  <section id="spelling" class="view">
+    <div class="card">
+      <h2>Spelling for the 12yo</h2>
+      <p class="muted">She tested into Level 1 after missing the ck in <em>quick</em>. That is one rule, not a whole level. Run the gap finder below, then teach only the rules she misses, one rule per week, 15 minutes, Tuesday to Friday. The Today tab shows each day's step.</p>
+      <p class="muted">Free practice: <a href="https://www.spellingcity.com" target="_blank">SpellingCity</a> (type in her word list and play games on her own). The full printable guide is the file <strong>spelling-rules-guide.pdf</strong>.</p>
+    </div>
+
+    <div class="card">
+      <h3>Rule of the week (Nov and Dec)</h3>
+      <div id="spellSchedule"></div>
+      <p class="why">This is a starting order. After the gap finder, swap in whichever rules she actually missed.</p>
+    </div>
+
+    <div class="card">
+      <h3>10-minute gap finder</h3>
+      <p class="muted">Read each word aloud once, use it in a sentence, and let her write it from hearing without seeing this page. Tap the words she missed. Each miss points to a rule to teach.</p>
+      <div id="gapGrid" class="gap-grid"></div>
+      <div id="gapResult" class="spell-box"></div>
+      <button id="gapClear" class="small-btn">Clear and start over</button>
+    </div>
+
+    <div class="card">
+      <h3>The 21 rules</h3>
+      <div id="spellRules"></div>
+    </div>
+
+    <div class="card">
+      <h3>Memory tricks for trouble words</h3>
+      <div id="spellTricks"></div>
+      <p class="why">Since she writes poetry, she can invent her own trick for any word. The sillier, the stickier.</p>
+    </div>
+
+    <div class="card">
+      <h3>Personal word list</h3>
+      <p class="muted">Each week, collect 5 to 8 words she misspelled in her journal, freewrites, or poems. Do not correct while she writes. Fix them afterward. Practice: look, say it in parts, cover, write, check. Three days in a row. Saves on this device.</p>
+      <div id="wordForm" class="word-form">
+        <input id="wlWrong" placeholder="Misspelled" autocomplete="off">
+        <input id="wlRight" placeholder="Correct" autocomplete="off">
+        <input id="wlRule" placeholder="Rule or trick" autocomplete="off">
+        <button id="wlAdd" class="small-btn">Add</button>
+      </div>
+      <div id="wordList"></div>
     </div>
   </section>
 
@@ -739,14 +819,585 @@ const WEEKS = [
       {day:"Thu", history:"Full individual rotation + October monthly wrap. Fill in the Monthly Snapshot and log portfolio pieces before the month closes.", links:[]},
       {day:"Fri", history:"HALLOWEEN SPECIAL — Pumpkin Science, no formal rotation today. Predict and test whether a pumpkin sinks or floats (it floats!). Estimate the seed count before cutting it open, then count in groups of 10 and see who was closest.", links:[]},
     ]
+  },
+  {
+    "week": 13,
+    "range": "Nov 2–6",
+    "theme": {
+      "history": "Election Day and Choosing a Leader; George Washington, the First President",
+      "science": "Rocks: Igneous, Sedimentary, Metamorphic"
+    },
+    "spell": {
+      "rule": "1",
+      "title": "Rule 1: the ck rule (quick) and q always has u",
+      "note": "Start here. She missed the ck in quick, so this is the exact gap."
+    },
+    "days": [
+      {
+        "day": "Mon",
+        "history": "KICKOFF DAY: Dance party. Preview the week: Election Day on Tuesday, and a rock hunt on Wednesday. Each kid names one goal. <strong>Skill Spotlight, Touch Typing:</strong> 5yo finds the letters of their name on the keyboard, 8yo plays home row games, 10yo and 12yo do a Typing.com lesson and compare speed to last time.",
+        "links": [
+          {
+            "l": "Typing.com (free)",
+            "u": "https://www.typing.com"
+          }
+        ]
+      },
+      {
+        "day": "Tue",
+        "history": "ELECTION DAY (Nov 3). Hold a family mock election. Pick two choices (what is for dinner, or which movie), make a ballot, vote in secret, count the votes, and talk about why every vote is counted. Older kids: why does the country vote on a set day?",
+        "links": [
+          {
+            "l": "How voting works for kids",
+            "u": "https://dcmp.org/media/24353-meet-the-helpers-how-voting-works-for-kids"
+          },
+          {
+            "l": "Election videos for kids (list)",
+            "u": "https://www.weareteachers.com/election-videos-for-kids/"
+          }
+        ]
+      },
+      {
+        "day": "Wed",
+        "history": "Nature walk + Science: Rocks. Collect 6 to 10 rocks on the walk. Watch the video, then guess which of the three types each rock might be.",
+        "links": [
+          {
+            "l": "Rocks and Minerals (PBS)",
+            "u": "https://www.pbs.org/video/d4k-rocks-and-minerals-video-short-6bqyjn/"
+          },
+          {
+            "l": "The rock cycle",
+            "u": "https://thekidshouldseethis.com/post/the-rock-cycle-how-igneous-sedimentary-and-metamorphic-rocks-transform-our-earth"
+          }
+        ]
+      },
+      {
+        "day": "Thu",
+        "history": "History: George Washington, the first president. He could have been king or stayed in office for life. Why did he choose to step aside? Full individual rotation.",
+        "links": [
+          {
+            "l": "Why Didn't Washington Become King?",
+            "u": "https://www.mountvernon.org/video/view/Orga3ac3bzw"
+          },
+          {
+            "l": "George Washington",
+            "u": "https://dcmp.org/media/16613-george-washington"
+          }
+        ]
+      },
+      {
+        "day": "Fri",
+        "history": "Rock sorting lab: sort the collection by color, texture, and weight, then by guessed type. Library / catch-up.",
+        "links": []
+      }
+    ]
+  },
+  {
+    "week": 14,
+    "range": "Nov 9–13",
+    "theme": {
+      "history": "Washington's Presidency and Veterans Day",
+      "science": "Minerals and the Rock Cycle"
+    },
+    "spell": {
+      "rule": "2, 3",
+      "title": "Rules 2 and 3: FLoSS (stuff, bell, miss) and tch vs ch (catch, lunch)",
+      "note": "Two short rules. Do FLoSS Tue and Wed, tch Thu and Fri."
+    },
+    "days": [
+      {
+        "day": "Mon",
+        "history": "KICKOFF DAY: Dance party. Preview the week: Veterans Day on Wednesday and minerals on Thursday. Each kid names one goal. <strong>Skill Spotlight, Map Reading:</strong> 5yo points to North on a compass rose, 8yo follows a hand-drawn treasure map, 10yo uses a map scale to estimate distance, 12yo plots a short route with a real compass.",
+        "links": [
+          {
+            "l": "Map reading basics",
+            "u": "https://kidminds.org/map-reading-basics/"
+          }
+        ]
+      },
+      {
+        "day": "Tue",
+        "history": "History: how Washington set habits that still shape the job of president (a cabinet of advisors, two terms, handing over power peacefully). Discussion: which of these matters most and why?",
+        "links": [
+          {
+            "l": "George Washington",
+            "u": "https://dcmp.org/media/16613-george-washington"
+          }
+        ]
+      },
+      {
+        "day": "Wed",
+        "history": "VETERANS DAY (Nov 11). Watch one video together, then write or draw a thank-you note to a veteran. If you know one, deliver it. Light day otherwise.",
+        "links": [
+          {
+            "l": "Veterans Day videos for kids (list)",
+            "u": "https://www.weareteachers.com/veterans-day-videos/"
+          }
+        ]
+      },
+      {
+        "day": "Thu",
+        "history": "Nature walk + Science: Minerals and the rock cycle. Scratch test: try a penny, a fingernail, and a nail on your rock collection and see which rocks scratch easily. Full individual rotation.",
+        "links": [
+          {
+            "l": "Rocks and Minerals (PBS)",
+            "u": "https://www.pbs.org/video/d4k-rocks-and-minerals-video-short-6bqyjn/"
+          },
+          {
+            "l": "The rock cycle",
+            "u": "https://thekidshouldseethis.com/post/the-rock-cycle-how-igneous-sedimentary-and-metamorphic-rocks-transform-our-earth"
+          }
+        ]
+      },
+      {
+        "day": "Fri",
+        "history": "Make a rock cycle story: each kid draws or tells how one rock changes from igneous to sedimentary to metamorphic. Library / catch-up.",
+        "links": []
+      }
+    ]
+  },
+  {
+    "week": 15,
+    "range": "Nov 16–20",
+    "theme": {
+      "history": "The Louisiana Purchase and the Lewis and Clark Expedition",
+      "science": "Weathering, Erosion and Soil"
+    },
+    "spell": {
+      "rule": "4, 5",
+      "title": "Rules 4 and 5: dge vs ge (badge, page) and the jobs of silent e",
+      "note": "dge Tue and Wed, silent e Thu and Fri."
+    },
+    "days": [
+      {
+        "day": "Mon",
+        "history": "KICKOFF DAY: Dance party. Preview the week: a huge land deal, an expedition, and a mini erosion lab. Each kid names one goal. <strong>Skill Spotlight, Body Language:</strong> play Feelings Charades. 10yo adds mismatch rounds, 12yo talks about posture, tone, and what is not being said.",
+        "links": []
+      },
+      {
+        "day": "Tue",
+        "history": "History: the Louisiana Purchase. President Jefferson bought land from France for about 15 million dollars, and the country nearly doubled in size. Find it on a map and ask: what would you want to know about land you have never seen?",
+        "links": [
+          {
+            "l": "Louisiana Purchase (PBS)",
+            "u": "https://www.pbs.org/video/louisiana-purchase-3rd-grade-social-studies-sm2xag"
+          }
+        ]
+      },
+      {
+        "day": "Wed",
+        "history": "Nature walk + Science: Weathering and erosion. Build a small hill of dirt and sand in a tray, pour water on it, and watch what moves. Look outside for cracks in rocks, gullies, or washed out spots.",
+        "links": [
+          {
+            "l": "Weathering, erosion, and deposition",
+            "u": "https://www.generationgenius.com/blog/weathering-erosion-and-deposition-for-kids/"
+          }
+        ]
+      },
+      {
+        "day": "Thu",
+        "history": "History: Lewis and Clark and the Corps of Discovery. Why did Jefferson send them, and who helped them? Ask an Expert: each kid writes 2 questions they would ask Lewis, Clark, or Sacagawea. Full individual rotation.",
+        "links": [
+          {
+            "l": "Lewis and Clark (PBS)",
+            "u": "https://pr.pbs.org/video/d4k-science-lewis-and-clark-video-short-cfzwdn/"
+          },
+          {
+            "l": "Lewis and Clark for kids",
+            "u": "https://dcmp.org/media/17795-lewis-and-clark-for-kids"
+          }
+        ]
+      },
+      {
+        "day": "Fri",
+        "history": "Draw a map of the expedition route from memory, then compare it to a real one. Each kid picks one dish to help make for Thanksgiving. Library / catch-up.",
+        "links": []
+      }
+    ]
+  },
+  {
+    "week": 16,
+    "range": "Nov 23–25 (Thanksgiving week)",
+    "theme": {
+      "history": "The Harvest Feast of 1621 and Giving Thanks",
+      "science": "Where Our Food Comes From"
+    },
+    "spell": {
+      "rule": "20",
+      "title": "Rule 20: homophones (their, there, they're, to, too, two, your, you're, its, it's)",
+      "note": "Short week. Practice by writing a gratitude letter or poem with the right word in each spot."
+    },
+    "days": [
+      {
+        "day": "Mon",
+        "history": "KICKOFF DAY: Dance party. Preview the short week. Each kid names one goal. <strong>Life Skill:</strong> each kid does one real step of a Thanksgiving dish (measure, stir, wash, set the table) and learns the name of the step.",
+        "links": []
+      },
+      {
+        "day": "Tue",
+        "history": "History: the harvest feast of 1621 and the people who were there, including the Wampanoag. Talk about whose story gets told and whose gets left out.",
+        "links": [
+          {
+            "l": "The First Thanksgiving (National Geographic Kids)",
+            "u": "https://kids.nationalgeographic.com/explore/history/first-thanksgiving"
+          },
+          {
+            "l": "1621: A New Look at Thanksgiving",
+            "u": "https://kidworldcitizen.org/2011/11/21/1621-a-new-look-at-thanksgiving"
+          }
+        ]
+      },
+      {
+        "day": "Wed",
+        "history": "Light day. Science: trace your Thanksgiving dinner back to the farm. Pick 3 foods and draw where each one grew. Poetry tea time: write a gratitude poem or letter to read at dinner.",
+        "links": [
+          {
+            "l": "Where does food come from?",
+            "u": "https://foodwise.org/articles/video-where-does-food-come-from/"
+          },
+          {
+            "l": "Where food comes from (videos)",
+            "u": "https://www.foodafactoflife.org.uk/5-7-years/where-food-comes-from/videos/"
+          }
+        ]
+      },
+      {
+        "day": "Thu",
+        "history": "THANKSGIVING. No school. Enjoy the day.",
+        "links": []
+      },
+      {
+        "day": "Fri",
+        "history": "No school. Rest day.",
+        "links": []
+      }
+    ]
+  },
+  {
+    "week": 17,
+    "range": "Nov 30–Dec 4",
+    "theme": {
+      "history": "Heading West: Pioneers and the Oregon Trail",
+      "science": "How Animals Survive Winter"
+    },
+    "spell": {
+      "rule": "9",
+      "title": "Rule 9: the 1-1-1 doubling rule (hop to hopping, run to running)",
+      "note": "Dictate sentences that use running, stopped, bigger, and swimming."
+    },
+    "days": [
+      {
+        "day": "Mon",
+        "history": "KICKOFF DAY: Dance party. Preview the week: wagons heading west and animals getting ready for winter. Each kid names one goal. <strong>Money and Enterprise:</strong> each kid plans a small holiday budget or a make-and-sell idea. Decide what it costs, what you would charge, and what is left over.",
+        "links": []
+      },
+      {
+        "day": "Tue",
+        "history": "History: why families headed west on the Oregon Trail and what the trip was really like. Plot the route from Missouri toward Oregon on a map.",
+        "links": [
+          {
+            "l": "In Pursuit of a Dream (Oregon Trail)",
+            "u": "https://dcmp.org/media/7036-in-pursuit-of-a-dream"
+          },
+          {
+            "l": "Pathways: the pioneers (PBS)",
+            "u": "https://video.iowapbs.org/video/introduction-pathways-pioneer-sz40fl/"
+          }
+        ]
+      },
+      {
+        "day": "Wed",
+        "history": "Nature walk + Science: How animals survive winter. Sort what you know into three groups: hibernate, migrate, or stay and adapt. Look for tracks, nests, and signs of who is still active.",
+        "links": [
+          {
+            "l": "Animals in winter: migration and hibernation",
+            "u": "https://whatihavelearnedteaching.com/what-animals-do-in-winter-books-and-videos-about-migration-and-hibernation/"
+          },
+          {
+            "l": "Hibernation (video)",
+            "u": "https://www.kapowprimary.com/video/pupil-video-hibernation/"
+          }
+        ]
+      },
+      {
+        "day": "Thu",
+        "history": "Pioneer packing challenge: a wagon could carry only so much. Each kid chooses what to bring from a list and defends the choices. Read what the Oregon Trail game left out. Full individual rotation.",
+        "links": [
+          {
+            "l": "What the Oregon Trail game did not teach",
+            "u": "https://www.familysearch.org/en/blog/oregon-trail-game"
+          }
+        ]
+      },
+      {
+        "day": "Fri",
+        "history": "Library / catch-up. Start thinking about what each kid wants to show at Thursday's showcase.",
+        "links": []
+      }
+    ]
+  },
+  {
+    "week": 18,
+    "range": "Dec 7–10 (last week)",
+    "theme": {
+      "history": "Showcase Week: From the First Election to the Western Trail",
+      "science": "Snowflakes and Winter Science"
+    },
+    "spell": {
+      "rule": "Review",
+      "title": "Review week: re-run the gap finder and compare to the first time",
+      "note": "Use the Spelling tab. Which rules moved from missed to correct? Choose 3 rules to carry into January."
+    },
+    "days": [
+      {
+        "day": "Mon",
+        "history": "KICKOFF DAY: Dance party. Preview the last week: snowflakes, a showcase, and a celebration. <strong>Character and Mindset:</strong> each kid names one thing they got better at this fall and one thing they want to try in January.",
+        "links": []
+      },
+      {
+        "day": "Tue",
+        "history": "Science: how snowflakes form and why they have six sides. Cut paper snowflakes with six points, then look for the pattern in each.",
+        "links": [
+          {
+            "l": "What makes snowflakes take shape (UCAR)",
+            "u": "https://scied.ucar.edu/kids/video/what-makes-snowflakes-take-shape"
+          },
+          {
+            "l": "Snowflake science videos",
+            "u": "https://littlebinsforlittlehands.com/snowflake-science-youtube-videos/"
+          },
+          {
+            "l": "How does snow form?",
+            "u": "https://www.weareteachers.com/how-does-snow-form/"
+          }
+        ]
+      },
+      {
+        "day": "Wed",
+        "history": "Winter nature walk + review: a quick oral tour of the fall (election, Washington, Louisiana Purchase, Lewis and Clark, the Oregon Trail, rocks, soil, food, winter animals). Each kid picks one favorite piece of work for the showcase. Log portfolio pieces.",
+        "links": []
+      },
+      {
+        "day": "Thu",
+        "history": "SHOWCASE DAY and last day before break. Each kid shares their favorite piece with the family. Print or copy the Progress Report, fill in the Monthly Snapshot, and re-run the spelling gap finder. Celebrate with something warm to drink.",
+        "links": []
+      }
+    ]
   }
 ];
 
+const SPELL_GROUPS = [
+ {
+  "name": "A. Short words and their endings (start here)",
+  "rules": [
+   {
+    "n": 1,
+    "name": "The ck rule",
+    "rule": "Right after a short vowel, in a one-syllable word, the /k/ sound is spelled <strong>ck</strong>.",
+    "ex": "quick, back, duck, black, truck, check, stick",
+    "watch": "It does not happen after a long vowel or a consonant: bake, book, milk, tank. Quick also uses <strong>qu</strong>: q is always followed by u (queen, quiet, equal)."
+   },
+   {
+    "n": 2,
+    "name": "The FLoSS rule",
+    "rule": "One-syllable words with a short vowel that end in <strong>f, l, or s</strong> double that letter.",
+    "ex": "stuff, cliff, bell, hill, miss, class, grass",
+    "watch": "Exceptions: if, of, pal, gas, bus, yes, plus, this."
+   },
+   {
+    "n": 3,
+    "name": "tch vs ch",
+    "rule": "At the end of a word, right after a short vowel, the /ch/ sound is spelled <strong>tch</strong>. Otherwise it is <strong>ch</strong>.",
+    "ex": "catch, witch, patch, kitchen  |  but: teach, beach, lunch, bench",
+    "watch": "Exceptions: much, such, which, rich, attach, sandwich."
+   },
+   {
+    "n": 4,
+    "name": "dge vs ge",
+    "rule": "At the end of a word, right after a short vowel, the /j/ sound is spelled <strong>dge</strong>. Otherwise it is <strong>ge</strong>. English words do not end in j.",
+    "ex": "badge, edge, bridge, dodge  |  but: page, huge, change, large",
+    "watch": "If the vowel is long or there is a consonant before it, use ge."
+   }
+  ]
+ },
+ {
+  "name": "B. Silent e and soft sounds",
+  "rules": [
+   {
+    "n": 5,
+    "name": "The jobs of silent e",
+    "rule": "Silent e does four jobs: it makes the vowel before it long, it keeps words from ending in v, it keeps c and g soft, and it gives a syllable a vowel (table, little).",
+    "ex": "cap → cape, hop → hope  |  have, give, love  |  face, page  |  table, simple",
+    "watch": "No English word ends in a plain v, so love, give, and have all need their e."
+   },
+   {
+    "n": 6,
+    "name": "Soft c and soft g",
+    "rule": "C says /s/ before <strong>e, i, y</strong> (city, cent, cycle). G <i>can</i> say /j/ before e, i, y (giant, gem, gym).",
+    "ex": "city, ice, circle, fancy  |  giant, magic, energy",
+    "watch": "G is only sometimes soft: get, give, girl, together stay hard. C before a, o, u is always hard (cat, cot, cup)."
+   }
+  ]
+ },
+ {
+  "name": "C. Vowel teams",
+  "rules": [
+   {
+    "n": 7,
+    "name": "Middle vs end of the word",
+    "rule": "Some vowel teams have two spellings. Use the first in the middle of a word and the second at the end: <strong>ai / ay</strong>, <strong>oi / oy</strong>, <strong>au / aw</strong>, <strong>ou / ow</strong>.",
+    "ex": "rain, play  |  coin, boy  |  haul, claw  |  out, cow",
+    "watch": "A few exceptions inside words: royal, lawn, down, town. Ow also says long o: snow, grow, window."
+   },
+   {
+    "n": 8,
+    "name": "ie vs ei",
+    "rule": "<strong>I before e, except after c, or when it sounds like long a.</strong>",
+    "ex": "believe, field, piece, friend  |  receive, ceiling  |  neighbor, weigh, eight",
+    "watch": "Exceptions: science, weird, seize, either, neither, foreign, height."
+   }
+  ]
+ },
+ {
+  "name": "D. Adding endings (suffixes)",
+  "rules": [
+   {
+    "n": 9,
+    "name": "The 1-1-1 doubling rule",
+    "rule": "If a word has <strong>1</strong> syllable, <strong>1</strong> vowel, and ends in <strong>1</strong> consonant, double the last letter before an ending that starts with a vowel.",
+    "ex": "hop → hopping, run → running, stop → stopped, big → bigger",
+    "watch": "Do not double w, x, or y: snowing, fixing, playing. Do not double before a consonant ending."
+   },
+   {
+    "n": 10,
+    "name": "Doubling in longer words",
+    "rule": "In a two-syllable word, double the last consonant only if the stress is on the <strong>last</strong> syllable.",
+    "ex": "begin → beginning, admit → admitted, prefer → preferred",
+    "watch": "No doubling when the stress is on the first syllable: open → opening, visit → visiting, listen → listening."
+   },
+   {
+    "n": 11,
+    "name": "Dropping silent e",
+    "rule": "Drop the silent e before an ending that starts with a vowel. Keep it before an ending that starts with a consonant.",
+    "ex": "hope → hoping, make → making, nice → nicer  |  hope → hopeful, care → careful, love → lovely",
+    "watch": "Keep the e to protect a soft c or g: noticeable, courageous, manageable. Exceptions: argument, truly, ninth."
+   },
+   {
+    "n": 12,
+    "name": "Changing y to i",
+    "rule": "If a word ends in a <strong>consonant + y</strong>, change the y to i before an ending, except <strong>-ing</strong>.",
+    "ex": "happy → happiness, carry → carried, baby → babies  |  carry → carrying, cry → crying",
+    "watch": "If a vowel comes before the y, keep it: play → played, boy → boys, enjoy → enjoyed."
+   },
+   {
+    "n": 13,
+    "name": "Plurals",
+    "rule": "Add <strong>s</strong> to most words. Add <strong>es</strong> to words ending in s, x, z, ch, sh. Change consonant + y to <strong>ies</strong>. Many f and fe words change to <strong>ves</strong>.",
+    "ex": "dogs  |  boxes, churches, dishes, buses  |  babies, cities  |  leaf → leaves, knife → knives",
+    "watch": "Words ending in o vary: potatoes, tomatoes, heroes  |  but pianos, photos, radios. Some f words just add s: roofs, chiefs, cliffs."
+   }
+  ]
+ },
+ {
+  "name": "E. Word parts",
+  "rules": [
+   {
+    "n": 14,
+    "name": "Prefixes never lose letters",
+    "rule": "When a prefix meets a word, keep every letter from both parts. That is where double letters come from.",
+    "ex": "mis + spell = misspell, un + necessary = unnecessary, dis + satisfied = dissatisfied, re + enter = reenter",
+    "watch": "Disappear and disappoint have one s because the root starts with a, not s: dis + appear."
+   },
+   {
+    "n": 15,
+    "name": "-tion, -sion, -cian",
+    "rule": "<strong>-tion</strong> is the most common ending for the /shun/ sound. Use <strong>-sion</strong> after l, n, r, or s, and for the /zhun/ sound. Use <strong>-cian</strong> for people with a skill.",
+    "ex": "nation, action, motion  |  tension, version, mission, vision  |  musician, magician, electrician",
+    "watch": ""
+   },
+   {
+    "n": 16,
+    "name": "-able vs -ible",
+    "rule": "<strong>-able</strong> is added to whole words you can say alone. <strong>-ible</strong> is added to roots that are not words alone.",
+    "ex": "comfortable, readable, adorable  |  visible, possible, terrible, incredible",
+    "watch": "Test: remove the ending. If a real word is left (comfort, read), use -able."
+   },
+   {
+    "n": 17,
+    "name": "The all- words and -ful",
+    "rule": "When <strong>all</strong> joins another word it drops one l. The ending <strong>-ful</strong> has only one l.",
+    "ex": "already, always, almost, also, although, altogether  |  careful, helpful, grateful",
+    "watch": "All right stays as two words. The adverb is fully (two l's, since it is full + ly)."
+   }
+  ]
+ },
+ {
+  "name": "F. Tricky spots",
+  "rules": [
+   {
+    "n": 18,
+    "name": "Silent letters",
+    "rule": "Some old spellings keep letters we no longer say. Learn them in pairs.",
+    "ex": "kn: know, knight, knee  |  wr: write, wrong, wrist  |  gn: gnat, sign  |  mb: lamb, climb, thumb  |  gh: night, thought, through",
+    "watch": ""
+   },
+   {
+    "n": 19,
+    "name": "Greek and French spellings",
+    "rule": "<strong>ph</strong> says /f/. <strong>ch</strong> says /k/ in Greek-origin words and /sh/ in French-origin words.",
+    "ex": "phone, graph, elephant  |  school, chorus, chemistry, stomach  |  chef, machine, chandelier",
+    "watch": ""
+   },
+   {
+    "n": 20,
+    "name": "Homophones",
+    "rule": "Words that sound alike but mean different things. Learn the meaning, not just the spelling.",
+    "ex": "their (belongs to) / there (a place) / they're (they are)  |  to / too / two  |  your / you're  |  its / it's  |  whose / who's  |  principal (a person, your pal) / principle (a rule)",
+    "watch": "It's always means it is or it has. Its is the possessive and has no apostrophe."
+   },
+   {
+    "n": 21,
+    "name": "Say it the way it is written",
+    "rule": "For hard words, pronounce every syllable on purpose while you spell it, even if you never say it that way.",
+    "ex": "Wed-nes-day, choc-o-late, Feb-ru-ary, sep-a-rate, def-i-nite, fam-i-ly, bus-i-ness",
+    "watch": ""
+   }
+  ]
+ }
+];
+const SPELL_TRICKS = [["separate", "there's a RAT in sepaRATe"], ["necessary", "one Collar, two Sleeves"], ["friend", "a friend is there to the END"], ["because", "Big Elephants Can Always Understand Small Elephants"], ["piece", "a piece of PIE"], ["rhythm", "Rhythm Helps Your Two Hips Move"], ["believe", "you can't believe a LIE"], ["beautiful", "say it in parts: be-au-ti-ful"]];
+const SPELL_GAP = [["quick", "1"], ["stuff", "2"], ["catch", "3"], ["bridge", "4"], ["city", "6"], ["giant", "6"], ["rain / play", "7"], ["receive", "8"], ["running", "9"], ["beginning", "10"], ["hoping", "11"], ["carried", "12"], ["boxes / babies", "13"], ["unnecessary", "14"], ["nation", "15"], ["vision", "15"], ["musician", "15"], ["comfortable", "16"], ["visible", "16"], ["always", "17"], ["knight", "18"], ["school", "19"], ["their / there", "20"], ["separate", "21"]];
+const SPELL_STEPS = {"Tue": "Read the rule together and write all the examples.", "Wed": "Write 5 of her own words that follow the rule.", "Thu": "Use 3 of those words in a sentence or a line of poetry.", "Fri": "Dictation: the week's rule words plus her personal word list."};
+
 // ============ STATE ============
-const todayIdx = new Date().getDay(); // 0 Sun .. 6 Sat
 const DAY_NAMES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-let currentWeekView = parseInt(localStorage.getItem('hs_currentWeekIdx') || '0', 10);
-if(currentWeekView >= WEEKS.length) currentWeekView = 0;
+const DAY_OFFSET = {Mon:0, Tue:1, Wed:2, Thu:3, Fri:4};
+function addDays(d, n){ const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate()+n); return x; }
+function ymd(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+// Every week starts on a Monday. Week 1 = Mon Aug 3, 2026. The week of Aug 24 was skipped, so weeks 4 and later are shifted one extra week.
+const FIRST_MONDAY = new Date(2026, 7, 3);
+WEEKS.forEach((w,i)=>{ w.start = addDays(FIRST_MONDAY, 7*(i<3 ? i : i+1)); });
+// Add ?date=YYYY-MM-DD to the address to preview any day.
+function getToday(){
+  const m = /[?&]date=(\d{4})-(\d{2})-(\d{2})/.exec(location.search);
+  if(m) return new Date(+m[1], +m[2]-1, +m[3]);
+  const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate());
+}
+function lastSchoolDate(){
+  const w = WEEKS[WEEKS.length-1];
+  const offs = w.days.map(d=>DAY_OFFSET[d.day]);
+  return addDays(w.start, Math.max.apply(null, offs));
+}
+// Which week is today in? Returns {idx, state} where state is 'before', 'active', or 'break'
+function currentWeekInfo(){
+  const t = getToday();
+  if(t < WEEKS[0].start) return {idx:0, state:'before'};
+  if(t > lastSchoolDate()) return {idx:WEEKS.length-1, state:'break'};
+  let idx = 0;
+  WEEKS.forEach((w,i)=>{ if(w.start <= t) idx = i; });
+  return {idx, state:'active'};
+}
+let currentWeekView = currentWeekInfo().idx;
 
 // ============ TABS ============
 document.querySelectorAll('nav.tabs button').forEach(btn=>{
@@ -764,7 +1415,9 @@ function renderWeek(){
   document.getElementById('weekEyebrow').textContent = 'Week ' + w.week;
   document.getElementById('weekRange').textContent = w.range;
   document.getElementById('weekTheme').innerHTML =
-    '<p><strong>History:</strong> '+w.theme.history+'</p><p><strong>Science:</strong> '+w.theme.science+'</p>';
+    '<p><strong>History:</strong> '+w.theme.history+'</p><p><strong>Science:</strong> '+w.theme.science+'</p>' +
+    (w.spell ? '<p><strong>Spelling (12yo):</strong> '+w.spell.title+'</p>' : '');
+  const wj = document.getElementById('weekJump'); if(wj) wj.value = String(currentWeekView);
   document.getElementById('weekDays').innerHTML = w.days.map(d=>{
     const links = d.links.map(x=>`<a class="link-chip" href="${x.u}" target="_blank">${x.l}</a>`).join('');
     return `<div class="day-row">
@@ -772,9 +1425,6 @@ function renderWeek(){
       <div class="day-body"><p>${d.history}</p>${links?'<div class="links">'+links+'</div>':''}</div>
     </div>`;
   }).join('');
-
-  const storedCurrent = localStorage.getItem('hs_currentWeekIdx');
-  document.getElementById('setCurrentWeek').checked = storedCurrent !== null && parseInt(storedCurrent,10) === currentWeekView;
 
   const adjustNote = document.getElementById('weekAdjustNote');
   adjustNote.value = localStorage.getItem('hs_weekadjust_' + currentWeekView) || '';
@@ -793,38 +1443,52 @@ document.getElementById('nextWeek').addEventListener('click', ()=>{
   currentWeekView = (currentWeekView + 1) % WEEKS.length;
   renderWeek();
 });
-document.getElementById('setCurrentWeek').addEventListener('change', (e)=>{
-  if(e.target.checked){
-    localStorage.setItem('hs_currentWeekIdx', currentWeekView);
-  } else {
-    localStorage.removeItem('hs_currentWeekIdx');
-  }
-  renderToday();
-});
+(function(){
+  const sel = document.getElementById('weekJump');
+  sel.innerHTML = WEEKS.map((w,i)=>`<option value="${i}">Week ${w.week}: ${w.range}</option>`).join('');
+  sel.addEventListener('change', ()=>{ currentWeekView = parseInt(sel.value,10); renderWeek(); });
+  document.getElementById('goCurrentWeek').addEventListener('click', ()=>{ currentWeekView = currentWeekInfo().idx; renderWeek(); });
+})();
 
 // ============ TODAY RENDER ============
+function spellBox(w, dayName){
+  if(!w.spell || !SPELL_STEPS[dayName]) return '';
+  return `<div class="spell-box"><strong>Spelling for the 12yo:</strong> ${w.spell.title}<br><span class="muted">${SPELL_STEPS[dayName]} (15 minutes)</span></div>`;
+}
 function renderToday(){
-  const dateLabel = new Date().toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric'});
-  document.getElementById('todayDateLabel').textContent = dateLabel;
+  const t = getToday();
+  document.getElementById('todayDateLabel').textContent = t.toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric'});
+  const info = currentWeekInfo();
+  const w = WEEKS[info.idx];
+  const dayName = DAY_NAMES[t.getDay()];
+  const head = document.getElementById('todayHeading');
+  const body = document.getElementById('todayBody');
 
-  const storedCurrent = localStorage.getItem('hs_currentWeekIdx');
-  const dayName = DAY_NAMES[todayIdx];
-
-  if(storedCurrent === null){
-    document.getElementById('todayHeading').textContent = "No week marked as current yet";
-    document.getElementById('todayBody').innerHTML = '<p class="muted">Go to <strong>This Week</strong>, find the week you\'re on, and check "Mark this the current week."</p>';
+  if(info.state === 'break'){
+    head.textContent = 'Winter break';
+    body.innerHTML = '<p>The fall term is finished. Rest, read, play, and keep the Daily Lists going if the kids want to. Open <strong>Track It</strong> to print the Progress Report for your records.</p><p class="muted">Add January weeks when you are ready to plan them.</p>';
     return;
   }
-  const w = WEEKS[parseInt(storedCurrent,10)];
+  if(info.state === 'before'){
+    head.textContent = 'School has not started yet';
+    body.innerHTML = '<p class="muted">Week 1 begins Monday, Aug 3.</p>';
+    return;
+  }
   const d = w.days.find(x=>x.day === dayName);
   if(!d){
-    document.getElementById('todayHeading').textContent = "No school today";
-    document.getElementById('todayBody').innerHTML = '<p class="muted">Weekend / off day. Enjoy it.</p>';
+    head.textContent = 'No school today';
+    const isWeekend = (t.getDay() === 0 || t.getDay() === 6);
+    let preview = '';
+    if(isWeekend){
+      const nxt = WEEKS[info.idx + 1];
+      if(nxt) preview = `<p><strong>Coming up, Week ${nxt.week} (${nxt.range}):</strong><br>History: ${nxt.theme.history}<br>Science: ${nxt.theme.science}</p>`;
+    }
+    body.innerHTML = '<p class="muted">Weekend / off day. Enjoy it.</p>' + preview;
     return;
   }
-  document.getElementById('todayHeading').textContent = 'Week '+w.week+' — '+d.day;
+  head.textContent = 'Week '+w.week+', '+d.day;
   const links = d.links.map(x=>`<a class="link-chip" href="${x.u}" target="_blank">${x.l}</a>`).join('');
-  document.getElementById('todayBody').innerHTML = `<p>${d.history}</p>${links?'<div class="links">'+links+'</div>':''}`;
+  body.innerHTML = `<p>${d.history}</p>${links?'<div class="links">'+links+'</div>':''}${spellBox(w, d.day)}`;
 }
 
 // ============ DAILY CHECKLIST ============
@@ -919,7 +1583,6 @@ document.getElementById('resetAll').addEventListener('click', ()=>{
   if(confirm('Clear all saved tracking (checklists, notes, snapshot, portfolio) on this device? This cannot be undone.')){
     Object.keys(localStorage).filter(k=>k.startsWith('hs_')).forEach(k=>localStorage.removeItem(k));
     renderChecks(); renderWeeklyNote(); renderPortfolio(); renderSnapshot(); renderToday();
-    document.getElementById('setCurrentWeek').checked = false;
   }
 });
 
@@ -968,6 +1631,20 @@ function buildReport(){
       html += `<tr><td>${r}</td><td>${escapeHtml(row.readaloud||'')}</td><td>${escapeHtml(row.history||'')}</td><td>${escapeHtml(row.science||'')}</td><td>${escapeHtml(row.notes||'')}</td></tr>`;
     });
     html += '</tbody></table>';
+  }
+
+  // Spelling
+  const spMissed = loadJSON('hs_spell_gap', []);
+  const spWords = loadJSON('hs_spell_words', []);
+  if(spMissed.length || spWords.length){
+    html += '<h3>Spelling (12yo)</h3>';
+    if(spMissed.length){
+      const rs = Array.from(new Set(spMissed.map(i=>SPELL_GAP[i][1].split(',')[0].trim()))).sort((a,b)=>a-b);
+      html += '<p>Gap finder: '+spMissed.length+' of '+SPELL_GAP.length+' words missed. Rules to teach: '+rs.join(', ')+'.</p>';
+    }
+    if(spWords.length){
+      html += '<p>Personal word list:</p><ul class="plain">' + spWords.map(r=>'<li>'+escapeHtml(r.wrong)+' &rarr; <strong>'+escapeHtml(r.right)+'</strong>'+(r.rule?' ('+escapeHtml(r.rule)+')':'')+'</li>').join('') + '</ul>';
+    }
   }
 
   // Daily lists completed
@@ -1131,7 +1808,65 @@ document.getElementById('listCarry').addEventListener('click', ()=>{
   renderLists();
 });
 
+
+// ============ SPELLING TAB ============
+function escSp(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function loadJSON(k, d){ try{ const v = JSON.parse(localStorage.getItem(k)); return v === null ? d : v; }catch(e){ return d; } }
+function renderSpelling(){
+  document.getElementById('spellSchedule').innerHTML = WEEKS.filter(w=>w.spell).map(w=>
+    `<div class="sp-sched"><strong>Week ${w.week}<br><span class="muted">${w.range}</span></strong><div>${w.spell.title}<br><span class="muted">${w.spell.note}</span></div></div>`).join('');
+
+  const missed = new Set(loadJSON('hs_spell_gap', []));
+  document.getElementById('gapGrid').innerHTML = SPELL_GAP.map((g,i)=>
+    `<label class="gap-item"><input type="checkbox" data-i="${i}" ${missed.has(i)?'checked':''}> ${escSp(g[0])} <small>rule ${escSp(g[1])}</small></label>`).join('');
+  document.querySelectorAll('#gapGrid input').forEach(cb=>cb.addEventListener('change', ()=>{
+    const s = new Set(loadJSON('hs_spell_gap', []));
+    const i = parseInt(cb.dataset.i,10);
+    cb.checked ? s.add(i) : s.delete(i);
+    localStorage.setItem('hs_spell_gap', JSON.stringify(Array.from(s)));
+    renderGapResult();
+  }));
+  renderGapResult();
+
+  document.getElementById('spellRules').innerHTML = SPELL_GROUPS.map(g=>
+    `<details class="sp-group"><summary>${escSp(g.name)}</summary>` + g.rules.map(r=>
+      `<details class="sp-rule" id="rule-${r.n}"><summary>${r.n}. ${escSp(r.name)}</summary><div class="sp-body">
+        <p><strong>Rule:</strong> ${r.rule}</p><p><strong>Examples:</strong> ${r.ex}</p>${r.watch?'<p class="muted"><strong>Watch out:</strong> '+r.watch+'</p>':''}</div></details>`).join('') + '</details>').join('');
+
+  document.getElementById('spellTricks').innerHTML = SPELL_TRICKS.map(t=>
+    `<div class="sp-sched"><strong>${escSp(t[0])}</strong><div>${escSp(t[1])}</div></div>`).join('');
+  renderWordList();
+}
+function renderGapResult(){
+  const missed = loadJSON('hs_spell_gap', []);
+  const el = document.getElementById('gapResult');
+  if(!missed.length){ el.innerHTML = 'No misses marked yet.'; return; }
+  const rules = Array.from(new Set(missed.map(i=>SPELL_GAP[i][1].split(',')[0].trim()))).sort((a,b)=>a-b);
+  el.innerHTML = '<strong>Rules to teach, in order:</strong> ' + rules.join(', ') + '<br><span class="muted">'+missed.length+' of '+SPELL_GAP.length+' words missed.</span>';
+}
+document.getElementById('gapClear').addEventListener('click', ()=>{ localStorage.removeItem('hs_spell_gap'); renderSpelling(); });
+
+function renderWordList(){
+  const rows = loadJSON('hs_spell_words', []);
+  document.getElementById('wordList').innerHTML = rows.length ? rows.map((r,i)=>
+    `<div class="wl-row"><span>${escSp(r.wrong)}</span><span><strong>${escSp(r.right)}</strong></span><span class="muted">${escSp(r.rule)}</span><button class="small-btn" data-del="${i}">Remove</button></div>`).join('')
+    : '<p class="muted">No words yet.</p>';
+  document.querySelectorAll('#wordList [data-del]').forEach(b=>b.addEventListener('click', ()=>{
+    const r = loadJSON('hs_spell_words', []); r.splice(parseInt(b.dataset.del,10),1);
+    localStorage.setItem('hs_spell_words', JSON.stringify(r)); renderWordList();
+  }));
+}
+document.getElementById('wlAdd').addEventListener('click', ()=>{
+  const w = document.getElementById('wlWrong'), r = document.getElementById('wlRight'), u = document.getElementById('wlRule');
+  if(!w.value.trim() && !r.value.trim()) return;
+  const rows = loadJSON('hs_spell_words', []);
+  rows.push({wrong:w.value.trim(), right:r.value.trim(), rule:u.value.trim(), date:ymd(getToday())});
+  localStorage.setItem('hs_spell_words', JSON.stringify(rows));
+  w.value = r.value = u.value = ''; renderWordList();
+});
+
 // ============ INIT ============
+renderSpelling();
 renderWeek();
 renderLists();
 bindWeekAdjustNote();
